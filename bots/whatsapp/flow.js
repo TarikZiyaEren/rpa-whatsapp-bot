@@ -362,9 +362,21 @@ async function dogumIsle(telefon, metin, veri, hospitalId) {
       if (hasta?.dogum) {
         const [gun, ay, yil] = metin.split(".");
         const girilenDogum = `${yil}-${ay.padStart(2, "0")}-${gun.padStart(2, "0")}`;
+        const skipCheck = process.env.WA_SKIP_PATIENT_BIRTHDATE_CHECK === "true";
 
-        if (hasta.dogum !== girilenDogum) {
-          return guvenliWaSend(telefon, "❌ Doğum tarihi TC ile eşleşmiyor. Bilgilerinizi kontrol edin.");
+        if (hasta.dogum !== girilenDogum && !skipCheck) {
+          return guvenliWaSend(
+            telefon,
+            "❌ Doğum tarihi TC ile eşleşmiyor. Bilgilerinizi kontrol edin."
+          );
+        }
+
+        if (hasta.dogum !== girilenDogum && skipCheck) {
+          console.warn("[WA][FLOW] TEST MODE - Doğum tarihi kontrolü atlandı:", {
+            tc: veri.tc,
+            fhirDogum: hasta.dogum,
+            girilenDogum,
+          });
         }
       }
 
