@@ -32,7 +32,14 @@ if (process.env.ENABLE_MAIN_ROUTES === "true") {
 } else {
   console.log("[ROUTES] mainRoutes pasif.");
 }
-const apiRoutes = require("./routes/api");
+let apiRoutes = null;
+
+if (process.env.ENABLE_API_ROUTES === "true") {
+  apiRoutes = require("./routes/api");
+  console.log("[ROUTES] apiRoutes aktif.");
+} else {
+  console.log("[ROUTES] apiRoutes pasif.");
+}
 const redOnlemeRoutes = require("./routes/redOnleme");
 const credentialRoutes = require("./routes/credentials");
 const adminRoutes = require("./routes/admin");
@@ -147,7 +154,9 @@ if (mainRoutes) {
   app.use("/", mainRoutes);
 }
 }
-app.use("/api", apiRoutes);
+if (apiRoutes) {
+  app.use("/api", apiRoutes);
+}
 app.use("/red-onleme", redOnlemeRoutes);
 app.use("/credentials", credentialRoutes);
 app.use("/admin", adminRoutes);
