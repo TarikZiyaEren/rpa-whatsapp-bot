@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review Desk — RPA Sistem</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; color: #1a1a2e; }
+    .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 1.4rem; }
+    .header a { color: #a8dadc; text-decoration: none; font-size: 0.9rem; }
+    .stats-bar { display: flex; gap: 16px; padding: 16px 32px; background: #fff; border-bottom: 1px solid #e0e0e0; flex-wrap: wrap; }
+    .stat-card { padding: 12px 20px; border-radius: 8px; min-width: 120px; text-align: center; }
+    .stat-card .num { font-size: 1.8rem; font-weight: 700; }
+    .stat-card .label { font-size: 0.75rem; color: #666; text-transform: uppercase; }
+    .stat-bekleyen { background: #fff3cd; border: 1px solid #ffc107; }
+    .stat-bekleyen .num { color: #856404; }
+    .stat-tamamlanan { background: #d4edda; border: 1px solid #28a745; }
+    .stat-tamamlanan .num { color: #155724; }
+    .stat-reddedilen { background: #f8d7da; border: 1px solid #dc3545; }
+    .stat-reddedilen .num { color: #721c24; }
+    .stat-toplam { background: #e8eaf6; border: 1px solid #5c6bc0; }
+    .stat-toplam .num { color: #283593; }
+    .filters { padding: 12px 32px; display: flex; gap: 8px; }
+    .filters a { padding: 6px 16px; border-radius: 20px; text-decoration: none; font-size: 0.85rem; background: #e0e0e0; color: #333; }
+    .filters a.active { background: #1a1a2e; color: #fff; }
+    .container { padding: 16px 32px; }
+    .review-item { background: #fff; border-radius: 10px; margin-bottom: 16px; border: 1px solid #e0e0e0; overflow: hidden; }
+    .review-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; cursor: pointer; }
+    .review-header:hover { background: #f8f9fa; }
+    .risk-badge { padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+    .risk-yuksek { background: #f8d7da; color: #721c24; }
+    .risk-orta { background: #fff3cd; color: #856404; }
+    .risk-dusuk { background: #d4edda; color: #155724; }
+    .oncelik-acil { border-left: 4px solid #dc3545; }
+    .oncelik-yuksek { border-left: 4px solid #ffc107; }
+    .oncelik-normal { border-left: 4px solid #6c757d; }
+    .durum-badge { padding: 3px 10px; border-radius: 10px; font-size: 0.75rem; }
+    .durum-beklemede { background: #fff3cd; color: #856404; }
+    .durum-tamamlandi { background: #d4edda; color: #155724; }
+    .durum-reddedildi { background: #f8d7da; color: #721c24; }
+    .durum-tekrar_dene { background: #cce5ff; color: #004085; }
+    .meta-row { display: flex; gap: 20px; font-size: 0.85rem; color: #555; flex-wrap: wrap; }
+    .review-body { display: none; padding: 0 20px 20px; border-top: 1px solid #eee; }
+    .review-body.open { display: block; }
+    .section { margin-top: 16px; }
+    .section h3 { font-size: 0.95rem; margin-bottom: 8px; color: #1a1a2e; }
+    .kart { padding: 10px 14px; margin-bottom: 6px; border-radius: 6px; font-size: 0.85rem; border-left: 3px solid #ccc; background: #f8f9fa; }
+    .kart-yuksek { border-left-color: #dc3545; background: #fff5f5; }
+    .kart-orta { border-left-color: #ffc107; background: #fffef5; }
+    .kart-dusuk, .kart-bilgi { border-left-color: #17a2b8; background: #f0f9ff; }
+    .kart .baslik { font-weight: 600; }
+    .kart .oneri { color: #0056b3; margin-top: 4px; font-style: italic; }
+    .belge-list { display: flex; gap: 8px; flex-wrap: wrap; }
+    .belge-tag { background: #ffeeba; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; }
+    .actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; align-items: flex-start; }
+    .actions textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.85rem; min-height: 60px; resize: vertical; }
+    .btn { padding: 10px 24px; border: none; border-radius: 6px; font-size: 0.9rem; cursor: pointer; font-weight: 600; }
+    .btn-onayla { background: #28a745; color: #fff; }
+    .btn-onayla:hover { background: #218838; }
+    .btn-reddet { background: #dc3545; color: #fff; }
+    .btn-reddet:hover { background: #c82333; }
+    .btn-tekrar { background: #007bff; color: #fff; }
+    .btn-tekrar:hover { background: #0069d9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .empty { text-align: center; padding: 60px; color: #999; font-size: 1.1rem; }
+    .sonuc-panel { margin-top: 12px; padding: 12px; background: #e8f5e9; border-radius: 6px; font-weight: 600; }
+    .sonuc-hata { background: #fce4ec; }
+    .islem-bilgi { font-size: 0.8rem; color: #888; margin-top: 8px; }
+    .duzeltme-panel { display: none; margin-top: 12px; padding: 12px; background: #f5f5f5; border-radius: 6px; }
+    .duzeltme-panel.open { display: block; }
+    .duzeltme-panel label { font-size: 0.85rem; font-weight: 600; display: block; margin-top: 8px; }
+    .duzeltme-panel input, .duzeltme-panel textarea { width: 100%; padding: 6px; margin-top: 4px; border: 1px solid #ddd; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Review Desk</h1>
+  <div>
+    <a href="/">Ana Sayfa</a> |
+    <a href="/dashboard">Dashboard</a> |
+    <span style="opacity:0.7"><%= currentUser?.username || '' %></span>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-card stat-bekleyen">
+    <div class="num"><%= stats.bekleyen || 0 %></div>
+    <div class="label">Bekleyen</div>
+  </div>
+  <div class="stat-card stat-tamamlanan">
+    <div class="num"><%= stats.tamamlanan || 0 %></div>
+    <div class="label">Onaylanan</div>
+  </div>
+  <div class="stat-card stat-reddedilen">
+    <div class="num"><%= stats.reddedilen || 0 %></div>
+    <div class="label">Reddedilen</div>
+  </div>
+  <div class="stat-card stat-toplam">
+    <div class="num"><%= stats.toplam || 0 %></div>
+    <div class="label">Toplam</div>
+  </div>
+</div>
+
+<div class="filters">
+  <a href="/review" class="<%= !filtre ? 'active' : '' %>">Tümü</a>
+  <a href="/review?durum=beklemede" class="<%= filtre === 'beklemede' ? 'active' : '' %>">Bekleyen</a>
+  <a href="/review?durum=tamamlandi" class="<%= filtre === 'tamamlandi' ? 'active' : '' %>">Onaylanan</a>
+  <a href="/review?durum=reddedildi" class="<%= filtre === 'reddedildi' ? 'active' : '' %>">Reddedilen</a>
+</div>
+
+<div class="container">
+  <% if (!items || items.length === 0) { %>
+    <div class="empty">Görüntülenecek review kaydı yok.</div>
+  <% } %>
+
+  <% for (const item of (items || [])) { %>
+    <div class="review-item oncelik-<%= item.oncelik || 'normal' %>" id="review-<%= item.id %>">
+
+      <div class="review-header" onclick="toggleBody('<%= item.id %>')">
+        <div>
+          <strong><%= item.hasta_ad || '?' %></strong>
+          <span style="color:#888;margin-left:8px">TC: ****<%= (item.tc || '').slice(-4) %></span>
+          <span class="durum-badge durum-<%= item.durum %>"><%= item.durum %></span>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="meta-row">
+            <span><%= item.islem_kodu || '-' %> — <%= item.islem_adi || '-' %></span>
+            <span><%= item.provider || '-' %></span>
+          </div>
+          <span class="risk-badge risk-<%= (item.ai_seviye || '').toLowerCase().replace('ü', 'u').replace('ş', 's') === 'yuksek' ? 'yuksek' : (item.ai_seviye || '').toLowerCase() === 'orta' ? 'orta' : 'dusuk' %>">
+            Risk: %<%= item.ai_risk ? Math.round(item.ai_risk * 100) : '?' %>
+            (<%= item.ai_seviye || '?' %>)
+          </span>
+        </div>
+      </div>
+
+      <div class="review-body" id="body-<%= item.id %>">
+
+        <!-- Özet -->
+        <% if (item.aciklama_ozet) { %>
+          <div class="section">
+            <h3>AI Karar Özeti</h3>
+            <p style="font-size:0.9rem"><%= item.aciklama_ozet %></p>
+          </div>
+        <% } %>
+
+        <!-- Açıklama Kartları -->
+        <% if (item.aciklamaKartlar && item.aciklamaKartlar.length) { %>
+          <div class="section">
+            <h3>Karar Açıklaması</h3>
+            <% for (const k of item.aciklamaKartlar) { %>
+              <div class="kart kart-<%= k.onem || 'bilgi' %>">
+                <div class="baslik"><%= k.baslik %></div>
+                <% if (k.aciklama && k.aciklama !== k.baslik) { %>
+                  <div style="margin-top:4px;font-size:0.8rem;color:#555"><%= k.aciklama %></div>
+                <% } %>
+                <% if (k.oneri) { %>
+                  <div class="oneri">&rarr; <%= k.oneri %></div>
+                <% } %>
+              </div>
+            <% } %>
+          </div>
+        <% } %>
+
+        <!-- Eksik Belgeler -->
+        <% if (item.eksikBelgeler && item.eksikBelgeler.length) { %>
+          <div class="section">
+            <h3>Eksik Belgeler</h3>
+            <div class="belge-list">
+              <% for (const b of item.eksikBelgeler) { %>
+                <span class="belge-tag"><%= b %></span>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Kural Analizi -->
+        <% if (item.kuralAnalizi && item.kuralAnalizi.tetiklenenler) { %>
+          <div class="section">
+            <h3>Tetiklenen Kurallar (<%= item.kuralAnalizi.tetiklenenSayisi %>)</h3>
+            <% for (const t of item.kuralAnalizi.tetiklenenler) { %>
+              <div class="kart kart-<%= t.riskEtkisi >= 0.2 ? 'yuksek' : t.riskEtkisi >= 0.1 ? 'orta' : 'dusuk' %>">
+                <div class="baslik"><%= t.kuralId %>: <%= t.kuralAdi %></div>
+                <div style="font-size:0.8rem;color:#555"><%= t.aciklama %></div>
+                <% if (t.oneri) { %>
+                  <div class="oneri">&rarr; <%= t.oneri %></div>
+                <% } %>
+              </div>
+            <% } %>
+          </div>
+        <% } %>
+
+        <!-- Doktor Notu -->
+        <% if (item.doktor_notu) { %>
+          <div class="section">
+            <h3>Doktor Notu</h3>
+            <p style="font-size:0.85rem;background:#f8f9fa;padding:10px;border-radius:6px"><%= item.doktor_notu %></p>
+          </div>
+        <% } %>
+
+        <!-- İşlem Bilgisi (zaten işlenmişse) -->
+        <% if (item.durum !== 'beklemede') { %>
+          <div class="islem-bilgi">
+            <strong>İşlem:</strong> <%= item.islem_tipi || '-' %> |
+            <strong>Yapan:</strong> <%= item.islem_yapan_kullanici || '-' %> |
+            <strong>Zaman:</strong> <%= item.islem_zamani || '-' %>
+            <% if (item.islem_notu) { %> | <strong>Not:</strong> <%= item.islem_notu %> <% } %>
+          </div>
+          <% if (item.sonuc) { %>
+            <div class="sonuc-panel <%= item.sonuc && item.sonuc.includes('RED') ? 'sonuc-hata' : '' %>">
+              Sonuç: <%= item.sonuc %>
+            </div>
+          <% } %>
+        <% } %>
+
+        <!-- Aksiyon Butonları (sadece beklemede olanlar) -->
+        <% if (item.durum === 'beklemede') { %>
+          <div class="section">
+            <h3>Aksiyon</h3>
+            <textarea id="not-<%= item.id %>" placeholder="İşlem notu (opsiyonel)..."></textarea>
+            <div class="actions" style="margin-top:10px">
+              <button class="btn btn-onayla" onclick="aksiyon('<%= item.id %>', 'onayla')">Onayla &amp; Gönder</button>
+              <button class="btn btn-reddet" onclick="aksiyon('<%= item.id %>', 'reddet')">Reddet</button>
+              <button class="btn btn-tekrar" onclick="toggleDuzeltme('<%= item.id %>')">Düzelt &amp; Tekrar Dene</button>
+            </div>
+
+            <div class="duzeltme-panel" id="duzeltme-<%= item.id %>">
+              <label>Yeni Doktor Notu</label>
+              <textarea id="yeni-not-<%= item.id %>" rows="3"><%= item.doktor_notu || '' %></textarea>
+              <label>Yeni İşlem Kodu</label>
+              <input id="yeni-kod-<%= item.id %>" value="<%= item.islem_kodu || '' %>">
+              <label>Yeni İşlem Adı</label>
+              <input id="yeni-ad-<%= item.id %>" value="<%= item.islem_adi || '' %>">
+              <button class="btn btn-tekrar" style="margin-top:10px" onclick="tekrarDene('<%= item.id %>')">Düzeltmeleri Gönder</button>
+            </div>
+          </div>
+        <% } %>
+
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<script>
+function toggleBody(id) {
+  document.getElementById('body-' + id).classList.toggle('open');
+}
+
+function toggleDuzeltme(id) {
+  document.getElementById('duzeltme-' + id).classList.toggle('open');
+}
+
+async function aksiyon(id, tip) {
+  const not = document.getElementById('not-' + id)?.value || '';
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = 'İşleniyor...';
+
+  try {
+    const resp = await fetch('/review/' + id + '/' + tip, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ not }),
+    });
+    const data = await resp.json();
+
+    if (data.ok) {
+      location.reload();
+    } else {
+      alert('Hata: ' + (data.hata || 'Bilinmeyen hata'));
+      btn.disabled = false;
+      btn.textContent = tip === 'onayla' ? 'Onayla & Gönder' : 'Reddet';
+    }
+  } catch (err) {
+    alert('Bağlantı hatası: ' + err.message);
+    btn.disabled = false;
+  }
+}
+
+async function tekrarDene(id) {
+  const not = document.getElementById('not-' + id)?.value || '';
+  const doktor_notu = document.getElementById('yeni-not-' + id)?.value || '';
+  const islem_kodu = document.getElementById('yeni-kod-' + id)?.value || '';
+  const islem_adi = document.getElementById('yeni-ad-' + id)?.value || '';
+
+  try {
+    const resp = await fetch('/review/' + id + '/tekrar-dene', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ not, doktor_notu, islem_kodu, islem_adi }),
+    });
+    const data = await resp.json();
+
+    if (data.ok) {
+      location.reload();
+    } else {
+      alert('Hata: ' + (data.hata || 'Bilinmeyen hata'));
+    }
+  } catch (err) {
+    alert('Bağlantı hatası: ' + err.message);
+  }
+}
+</script>
+
+</body>
+</html>

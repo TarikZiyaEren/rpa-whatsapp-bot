@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Kullanıcılar — Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; color: #111827; }
+    header { background: #1a237e; color: white; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+    nav a { color: #c7d2fe; text-decoration: none; margin-left: 20px; font-size: .9rem; }
+    nav a:hover { color: white; }
+
+    .hospital-badge {
+      font-size: .78rem;
+      background: #e8eaf6;
+      color: #1a237e;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .container { max-width: 1200px; margin: 36px auto; padding: 0 16px; }
+    .kart {
+      background: white;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 4px 18px rgba(0,0,0,.07);
+      margin-bottom: 20px;
+    }
+
+    .kart h2 {
+      color: #1a237e;
+      margin-bottom: 16px;
+      font-size: 1.05rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .mini-kart {
+      background: #f8faff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .mini-kart .etiket {
+      color: #6b7280;
+      font-size: .82rem;
+      margin-bottom: 8px;
+    }
+
+    .mini-kart .deger {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: .9rem;
+      color: #4b5563;
+      font-weight: 600;
+    }
+
+    input, select {
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: .95rem;
+      margin-bottom: 12px;
+      width: 100%;
+      background: white;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    button {
+      padding: 10px 18px;
+      background: #1a237e;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button.secondary {
+      background: #334155;
+    }
+
+    button.warning {
+      background: #b45309;
+    }
+
+    button.danger {
+      background: #dc2626;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9rem;
+    }
+
+    th {
+      background: #eef2ff;
+      padding: 11px 10px;
+      text-align: left;
+      color: #1f2937;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: top;
+    }
+
+    .ok-kutu  {
+      background: #d4edda;
+      color: #155724;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+    }
+
+    .err-kutu {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+    }
+
+    .badge-admin,
+    .badge-op,
+    .badge-viewer,
+    .badge-kvkk,
+    .badge-hospital,
+    .badge-plan,
+    .badge-status {
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 700;
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    .badge-admin { background: #e8eaf6; color: #1a237e; }
+    .badge-op { background: #e8f5e9; color: #1b5e20; }
+    .badge-viewer { background: #ecfeff; color: #155e75; }
+    .badge-kvkk { background: #fef3c7; color: #92400e; }
+    .badge-hospital { background: #eef2ff; color: #3730a3; }
+    .badge-plan { background: #f3f4f6; color: #374151; }
+    .badge-status { background: #f3f4f6; color: #111827; }
+
+    .badge-status.aktif { background: #dcfce7; color: #166534; }
+    .badge-status.pasif { background: #fee2e2; color: #991b1b; }
+
+    .muted {
+      color: #6b7280;
+      font-size: .85rem;
+    }
+
+    .filter-form {
+      display: flex;
+      gap: 12px;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+
+    .filter-form .field {
+      min-width: 280px;
+      flex: 1;
+    }
+
+    .inline-form {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .inline-form select {
+      margin-bottom: 0;
+      min-width: 160px;
+      width: auto;
+      flex: 1;
+    }
+
+    .inline-form button {
+      white-space: nowrap;
+      padding: 9px 14px;
+    }
+
+    .compact-form {
+      display: inline;
+    }
+
+    .stack-form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .stack-form select {
+      margin-bottom: 0;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .plan-help {
+      margin-top: 10px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: .84rem;
+      color: #4b5563;
+    }
+
+    @media (max-width: 960px) {
+      .grid,
+      .grid-3,
+      .field-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>
+    🏥 Admin Paneli
+    <% if (typeof currentHospital !== "undefined" && currentHospital) { %>
+      <span class="hospital-badge"><%= currentHospital.ad %></span>
+    <% } %>
+  </h1>
+  <nav>
+    <a href="/">🤖 Bot</a>
+    <a href="/dashboard">📊 Dashboard</a>
+    <a href="/monitoring">📈 Monitoring</a>
+    <a href="/admin/users">🏢 SaaS Admin</a>
+    <a href="/admin/audit">🔒 Audit</a>
+    <a href="/logout">Çıkış</a>
+  </nav>
+</header>
+
+<div class="container">
+
+  <% const safeHospitals = Array.isArray(hospitals) ? hospitals : []; %>
+  <% const safeUsers = Array.isArray(users) ? users : []; %>
+  <% const activeHospitalCount = safeHospitals.filter(h => Number(h.aktif) === 1).length; %>
+  <% const passiveHospitalCount = safeHospitals.filter(h => Number(h.aktif) !== 1).length; %>
+  <% const activeUserCount = safeUsers.filter(u => Number(u.aktif) === 1).length; %>
+
+  <% if (ok) { %>
+    <div class="ok-kutu">✅ <%= ok %></div>
+  <% } %>
+
+  <% if (hata) { %>
+    <div class="err-kutu">❌ <%= hata %></div>
+  <% } %>
+
+  <div class="kart">
+    <h2>📦 SaaS Özeti</h2>
+    <div class="grid-3">
+      <div class="mini-kart">
+        <div class="etiket">Toplam Hastane</div>
+        <div class="deger"><%= safeHospitals.length %></div>
+      </div>
+      <div class="mini-kart">
+        <div class="etiket">Aktif / Pasif Hastane</div>
+        <div class="deger"><%= activeHospitalCount %> / <%= passiveHospitalCount %></div>
+      </div>
+      <div class="mini-kart">
+        <div class="etiket">Aktif Kullanıcı</div>
+        <div class="deger"><%= activeUserCount %></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="kart">
+      <h2>🏥 Yeni Hastane Ekle</h2>
+      <form method="POST" action="/admin/hospitals">
+        <label>Hastane Adı</label>
+        <input type="text" name="ad" required value="<%= formData?.ad || '' %>">
+
+        <div class="field-row">
+          <div>
+            <label>Hastane Kodu</label>
+            <input type="text" name="kod" required placeholder="ornek: acibadem-demo" value="<%= formData?.kod || '' %>">
+          </div>
+          <div>
+            <label>Paket</label>
+            <select name="plan">
+              <option value="starter" <%= (formData?.plan || '') === 'starter' ? 'selected' : '' %>>Starter</option>
+              <option value="growth" <%= (formData?.plan || '') === 'growth' ? 'selected' : '' %>>Growth</option>
+              <option value="enterprise" <%= (formData?.plan || '') === 'enterprise' ? 'selected' : '' %>>Enterprise</option>
+            </select>
+          </div>
+        </div>
+
+        <label>Durum</label>
+        <select name="aktif">
+          <option value="1" <%= String(formData?.aktif ?? '1') === '1' ? 'selected' : '' %>>Aktif</option>
+          <option value="0" <%= String(formData?.aktif ?? '') === '0' ? 'selected' : '' %>>Pasif</option>
+        </select>
+
+        <button type="submit">➕ Hastane Ekle</button>
+      </form>
+
+      <div class="plan-help">
+        <strong>Paket mantığı:</strong><br>
+        Starter = başlangıç müşteri<br>
+        Growth = artan hacim / daha fazla kullanıcı<br>
+        Enterprise = kurumsal seviye müşteri
+      </div>
+    </div>
+
+    <div class="kart">
+      <h2>👤 Yeni Kullanıcı Ekle</h2>
+      <form method="POST" action="/admin/users">
+        <label>Kullanıcı Adı</label>
+        <input type="text" name="username" required value="<%= formData?.username || '' %>">
+
+        <label>Şifre</label>
+        <input type="password" name="password" required>
+
+        <div class="field-row">
+          <div>
+            <label>Rol</label>
+            <select name="role">
+              <option value="operator" <%= (formData?.role || 'operator') === 'operator' ? 'selected' : '' %>>Operator</option>
+              <option value="viewer" <%= (formData?.role || '') === 'viewer' ? 'selected' : '' %>>Viewer</option>
+              <option value="kvkk_officer" <%= (formData?.role || '') === 'kvkk_officer' ? 'selected' : '' %>>KVKK Officer</option>
+              <option value="admin" <%= (formData?.role || '') === 'admin' ? 'selected' : '' %>>Admin</option>
+            </select>
+          </div>
+          <div>
+            <label>Bağlı Hastane</label>
+            <select name="hospitalId">
+              <option value="">Hastane seç</option>
+              <% safeHospitals.forEach(h => { %>
+                <option value="<%= h.id %>" <%= String(formData?.hospitalId || '') === String(h.id) ? "selected" : "" %>>
+                  <%= h.ad %> (<%= h.kod %>)
+                </option>
+              <% }) %>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit">➕ Kullanıcı Ekle</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="kart">
+    <h2>🔎 Kullanıcı Filtrele</h2>
+    <form method="GET" action="/admin/users" class="filter-form">
+      <div class="field">
+        <label>Hastaneye Göre Filtrele</label>
+        <select name="hospitalId">
+          <option value="">Tüm hastaneler</option>
+          <% safeHospitals.forEach(h => { %>
+            <option value="<%= h.id %>" <%= selectedHospitalId === h.id ? "selected" : "" %>>
+              <%= h.ad %> (<%= h.kod %>)
+            </option>
+          <% }) %>
+        </select>
+      </div>
+      <button type="submit" class="secondary">Filtrele</button>
+    </form>
+  </div>
+
+  <div class="kart">
+    <h2>🏥 Mevcut Hastaneler</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ad</th>
+            <th>Kod</th>
+            <th>Paket</th>
+            <th>Durum</th>
+            <th>İşlem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (safeHospitals.length === 0) { %>
+            <tr>
+              <td colspan="5" class="muted">Henüz hastane kaydı yok.</td>
+            </tr>
+          <% } %>
+
+          <% safeHospitals.forEach(h => { %>
+            <tr>
+              <td><strong><%= h.ad %></strong></td>
+              <td><%= h.kod %></td>
+              <td>
+                <span class="badge-plan"><%= h.plan || "starter" %></span>
+              </td>
+              <td>
+                <span class="badge-status <%= Number(h.aktif) === 1 ? 'aktif' : 'pasif' %>">
+                  <%= Number(h.aktif) === 1 ? "aktif" : "pasif" %>
+                </span>
+              </td>
+              <td>
+                <form method="POST" action="/admin/hospitals/<%= h.id %>/status" class="compact-form">
+                  <input type="hidden" name="aktif" value="<%= Number(h.aktif) === 1 ? 0 : 1 %>">
+                  <button type="submit" class="<%= Number(h.aktif) === 1 ? 'warning' : 'secondary' %>">
+                    <%= Number(h.aktif) === 1 ? "Pasifleştir" : "Aktifleştir" %>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="kart">
+    <h2>👥 Mevcut Kullanıcılar</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kullanıcı</th>
+            <th>Rol</th>
+            <th>Durum</th>
+            <th>Hastane</th>
+            <th>Paket</th>
+            <th>Hastane Değiştir</th>
+            <th>Sil</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (safeUsers.length === 0) { %>
+            <tr>
+              <td colspan="7" class="muted">Henüz kullanıcı yok.</td>
+            </tr>
+          <% } %>
+
+          <% safeUsers.forEach(u => { %>
+            <tr>
+              <td>
+                <strong><%= u.username %></strong><br>
+                <span class="muted">ID: <%= u.id %></span>
+              </td>
+              <td>
+                <% if (u.role === "admin") { %>
+                  <span class="badge-admin">admin</span>
+                <% } else if (u.role === "viewer") { %>
+                  <span class="badge-viewer">viewer</span>
+                <% } else if (u.role === "kvkk_officer") { %>
+                  <span class="badge-kvkk">kvkk_officer</span>
+                <% } else { %>
+                  <span class="badge-op"><%= u.role %></span>
+                <% } %>
+              </td>
+              <td>
+                <span class="badge-status <%= Number(u.aktif) === 1 ? 'aktif' : 'pasif' %>">
+                  <%= Number(u.aktif) === 1 ? "aktif" : "pasif" %>
+                </span>
+              </td>
+              <td>
+                <%= u.hospitalName %><br>
+                <span class="muted"><%= u.hospitalCode %></span>
+              </td>
+              <td>
+                <span class="badge-plan"><%= u.hospitalPlan || "starter" %></span>
+              </td>
+              <td>
+                <% if (u.username !== "admin" && Number(u.aktif) === 1) { %>
+                  <form method="POST" action="/admin/users/<%= u.id %>/hospital" class="inline-form">
+                    <select name="hospitalId" required>
+                      <% safeHospitals.forEach(h => { %>
+                        <option value="<%= h.id %>" <%= u.hospital_id === h.id ? "selected" : "" %>>
+                          <%= h.ad %> (<%= h.kod %>)
+                        </option>
+                      <% }) %>
+                    </select>
+                    <button type="submit">Taşı</button>
+                  </form>
+                <% } else if (u.username === "admin") { %>
+                  <span class="muted">Admin taşınamaz</span>
+                <% } else { %>
+                  <span class="muted">Pasif kullanıcı taşınamaz</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (u.username !== "admin") { %>
+                  <form method="POST" action="/admin/users/<%= u.id %>/delete" onsubmit="return confirm('Bu kullanıcı silinsin mi?');">
+                    <button type="submit" class="danger">Sil</button>
+                  </form>
+                <% } else { %>
+                  <span class="muted">Silinemez</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

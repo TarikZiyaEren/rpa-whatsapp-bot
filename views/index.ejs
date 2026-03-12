@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Provizyon — RPA Panel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; }
+    header { background: #1a237e; color: white; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+    nav a { color: #aac4ff; text-decoration: none; margin-left: 20px; font-size: .9rem; }
+    nav a:hover { color: white; }
+
+    .hospital-badge {
+      font-size: .78rem;
+      background: #e8eaf6;
+      color: #1a237e;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .container { max-width: 820px; margin: 40px auto; padding: 0 16px; }
+    .kart {
+      background: white;
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      margin-bottom: 20px;
+    }
+
+    .kart h2 { color: #1a237e; margin-bottom: 20px; font-size: 1.1rem; }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: .9rem;
+      color: #555;
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 14px;
+      background: white;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #4361ee;
+    }
+
+    textarea { min-height: 90px; resize: vertical; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #1a237e;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:disabled { background: #9fa8da; cursor: not-allowed; }
+
+    .hata-kutu {
+      background: #f8d7da;
+      color: #721c24;
+      border-radius: 8px;
+      padding: 14px 18px;
+      border-left: 4px solid #e74c3c;
+      margin-bottom: 20px;
+    }
+
+    .uyari {
+      background: #fff3cd;
+      color: #856404;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: .92rem;
+      margin-bottom: 14px;
+      border-left: 4px solid #f5c542;
+    }
+
+    .basarili {
+      background: #d4edda;
+      color: #155724;
+      border-radius: 8px;
+      padding: 16px 20px;
+      border-left: 4px solid #2ecc71;
+    }
+
+    .kirmizi {
+      background: #f8d7da;
+      color: #721c24;
+      border-radius: 8px;
+      padding: 16px 20px;
+      border-left: 4px solid #e74c3c;
+    }
+
+    .insan {
+      background: #fff3cd;
+      color: #856404;
+      border-radius: 8px;
+      padding: 16px 20px;
+      border-left: 4px solid #f39c12;
+    }
+
+    h3 { margin-bottom: 8px; }
+
+    details summary { cursor: pointer; font-weight: 700; margin-top: 6px; }
+
+    pre {
+      background: rgba(255,255,255,.6);
+      border: 1px solid rgba(0,0,0,.08);
+      padding: 10px;
+      border-radius: 8px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .mini-card {
+      background: rgba(255,255,255,.65);
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .mini-card strong {
+      display: block;
+      font-size: .78rem;
+      color: #475569;
+      margin-bottom: 4px;
+    }
+
+    .mini-card div {
+      font-size: .98rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .muted { color: #64748b; font-size: .86rem; line-height: 1.4; }
+
+    #log-kutu {
+      background: #0f172a;
+      color: #7dd3fc;
+      font-family: monospace;
+      font-size: .85rem;
+      padding: 16px;
+      border-radius: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+      display: none;
+      margin-bottom: 16px;
+    }
+
+    #icd-bilgi {
+      background: #e8f4fd;
+      border: 1px solid #bee3f8;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: -10px;
+      margin-bottom: 14px;
+      font-size: .88rem;
+      display: none;
+    }
+
+    #icd-bilgi .icd-baslik {
+      font-weight: 700;
+      color: #1a237e;
+      margin-bottom: 6px;
+    }
+
+    #icd-bilgi .icd-satir {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+
+    #icd-bilgi .icd-tag {
+      background: #4361ee;
+      color: white;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: .8rem;
+    }
+
+    #icd-bilgi .belge-tag {
+      background: #f39c12;
+      color: white;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: .8rem;
+    }
+
+    #sut-oneriler {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      max-height: 160px;
+      overflow-y: auto;
+      display: none;
+      margin-top: -10px;
+      margin-bottom: 14px;
+    }
+
+    #sut-oneriler div {
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: .9rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    #sut-oneriler div:hover { background: #f0f4ff; }
+
+    #hastaGetirBtn {
+      margin-top: -4px;
+      margin-bottom: 14px;
+      background: #4361ee;
+      font-size: .95rem;
+    }
+
+    #hbys-durum {
+      display: none;
+      background: #eef6ff;
+      color: #174ea6;
+      border: 1px solid #cfe2ff;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-top: -8px;
+      margin-bottom: 14px;
+      font-size: .88rem;
+    }
+
+    #hbys-klinik-kutu {
+      display: none;
+      background: #f8fbff;
+      border: 1px solid #cfe2ff;
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: -8px;
+      margin-bottom: 14px;
+      font-size: .9rem;
+    }
+
+    #hbys-klinik-kutu h3 {
+      color: #174ea6;
+      margin-bottom: 10px;
+    }
+
+    .hbys-mini-list {
+      margin-top: 8px;
+      padding-left: 18px;
+    }
+
+    .hbys-mini-list li { margin-bottom: 4px; }
+
+    .hbys-chip {
+      display: inline-block;
+      background: #e0ecff;
+      color: #174ea6;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: .78rem;
+      font-weight: 600;
+      margin: 4px 6px 0 0;
+    }
+
+    .hbys-alert {
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      font-size: .9rem;
+      border-left: 4px solid;
+    }
+
+    .hbys-alert.red {
+      background: #fee2e2;
+      color: #991b1b;
+      border-left-color: #dc2626;
+    }
+
+    .hbys-alert.yellow {
+      background: #fef3c7;
+      color: #92400e;
+      border-left-color: #f59e0b;
+    }
+
+    .hbys-lab-high {
+      color: #b91c1c;
+      font-weight: 700;
+    }
+
+    .hbys-lab-low {
+      color: #1d4ed8;
+      font-weight: 700;
+    }
+
+    .neden-listesi {
+      margin-top: 8px;
+      padding-left: 18px;
+    }
+
+    .neden-listesi li { margin-bottom: 4px; }
+
+    #onerBtn {
+      margin-bottom: 14px;
+      background: #0f766e;
+      font-size: .95rem;
+    }
+
+    #onerilerKutu {
+      display: none;
+      background: #ecfeff;
+      color: #115e59;
+      border: 1px solid #99f6e4;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: -8px;
+      margin-bottom: 14px;
+      font-size: .9rem;
+    }
+
+    .oner-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #d9f3ef;
+      cursor: pointer;
+    }
+
+    .oner-item:last-child { border-bottom: none; }
+    .oner-item:hover { background: rgba(15,118,110,.06); }
+
+    #canli-risk-kutu {
+      display: none;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: -8px;
+      margin-bottom: 14px;
+      font-size: .9rem;
+    }
+
+    #ai-icd-panel {
+      display: none;
+      background: #f8fafc;
+      border: 1px solid #dbeafe;
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: -8px;
+      margin-bottom: 14px;
+      font-size: .92rem;
+    }
+
+    .ai-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .ai-mini {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .ai-mini strong {
+      display: block;
+      font-size: .82rem;
+      color: #475569;
+      margin-bottom: 4px;
+    }
+
+    .ai-mini div {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .ai-muted {
+      color: #64748b;
+      font-size: .86rem;
+      line-height: 1.4;
+    }
+
+    .ai-chip {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-size: .78rem;
+      font-weight: 700;
+      margin: 4px 6px 0 0;
+    }
+
+    .ai-list {
+      margin-top: 8px;
+      padding-left: 18px;
+    }
+
+    .ai-list li { margin-bottom: 8px; }
+
+    .ai-apply-btn {
+      display: inline-block;
+      width: auto;
+      padding: 6px 10px;
+      margin-top: 6px;
+      background: #2563eb;
+      font-size: .82rem;
+      border-radius: 6px;
+    }
+
+    .confidence-good { color: #15803d; font-weight: 700; }
+    .confidence-mid { color: #b45309; font-weight: 700; }
+    .confidence-low { color: #b91c1c; font-weight: 700; }
+    .hidden { display: none; }
+
+    .provider-warning {
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fdba74;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      font-size: .92rem;
+      line-height: 1.5;
+    }
+
+    .pdf-link {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #1d4ed8;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 700;
+    }
+
+    .pdf-link:hover {
+      background: #1e40af;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>
+    🏥 RPA Provizyon Paneli
+    <% if (typeof currentHospital !== "undefined" && currentHospital) { %>
+      <span class="hospital-badge"><%= currentHospital.ad %></span>
+    <% } %>
+  </h1>
+
+  <nav>
+    <a href="/dashboard">📊 Dashboard</a>
+    <a href="/history">📋 Geçmiş</a>
+    <a href="/credentials">🔑 Credentials</a>
+    <a href="/monitoring">📈 Monitoring</a>
+    <% if (currentUser && currentUser.role === "admin") { %>
+      <a href="/admin/users">🏥 Hospitals</a>
+      <a href="/admin/audit">🔒 Audit</a>
+    <% } %>
+    <a href="/logout">Çıkış</a>
+  </nav>
+</header>
+
+<div class="container">
+
+  <% if (hata) { %>
+    <div class="hata-kutu">❌ <%= hata %></div>
+  <% } %>
+
+  <% if (!myProviders || !myProviders.length) { %>
+    <div class="provider-warning">
+      Bu hastane / kullanıcı için kayıtlı provider credential bulunmuyor. Önce <strong>Credentials</strong> sayfasından giriş bilgisi kaydet.
+    </div>
+  <% } %>
+
+  <div class="kart">
+    <h2>📋 Provizyon Talebi</h2>
+
+    <form method="POST" action="/provizyon" id="form">
+      <label>Sigorta Portalı</label>
+      <select name="provider" required>
+        <option value="">— Seçiniz —</option>
+        <% providers.forEach(p => { %>
+          <option value="<%= p.key %>"
+            <%= myProviders.includes(p.key) ? '' : 'disabled' %>>
+            <%= p.label %>
+            <%= myProviders.includes(p.key) ? '✅' : '(credential yok)' %>
+          </option>
+        <% }) %>
+      </select>
+
+      <label>TC Kimlik No</label>
+      <input type="text" name="tc" maxlength="11" placeholder="12345678901" required>
+
+      <button type="button" id="hastaGetirBtn">🧾 HBYS'den Hasta Getir</button>
+      <div id="hbys-durum"></div>
+      <div id="hbys-klinik-kutu"></div>
+
+      <div class="row2">
+        <div>
+          <label>Hasta Adı Soyadı</label>
+          <input type="text" name="ad" placeholder="Ayşe Demir" required>
+        </div>
+        <div>
+          <label>Doğum Tarihi</label>
+          <input type="text" name="dogum" placeholder="01.01.1990" required>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label>İşlem Adı <span style="font-weight:400;color:#999">(yazınca SUT önerir)</span></label>
+          <input type="text" name="islem_adi" id="islem_adi" placeholder="Dahiliye Muayenesi" autocomplete="off">
+          <div id="sut-oneriler"></div>
+        </div>
+        <div>
+          <label>SUT Kodu</label>
+          <input type="text" name="islem_kodu" id="islem_kodu" placeholder="520.010" autocomplete="off">
+        </div>
+      </div>
+
+      <div id="icd-bilgi">
+        <div class="icd-baslik">🔬 ICD-10 Eşleşmesi</div>
+        <div id="icd-kodlar" class="icd-satir"></div>
+        <div id="icd-aciklama" style="color:#555;margin:4px 0"></div>
+        <div id="icd-belgeler" class="icd-satir"></div>
+      </div>
+
+      <label>Doktor Notu (opsiyonel)</label>
+      <textarea name="doktor_notu" id="doktor_notu" placeholder="Örn: Kronik böbrek yetmezliği, diyaliz..."></textarea>
+
+      <input type="hidden" name="ai_icd_kodu" id="ai_icd_kodu">
+      <input type="hidden" name="ai_icd_ad" id="ai_icd_ad">
+      <input type="hidden" name="ai_confidence" id="ai_confidence">
+      <input type="hidden" name="ai_onerilen_sutlar" id="ai_onerilen_sutlar" value="[]">
+      <input type="hidden" name="ai_secili_oneri_kodu" id="ai_secili_oneri_kodu">
+      <input type="hidden" name="ai_secili_oneri_ad" id="ai_secili_oneri_ad">
+
+      <div id="ai-icd-panel">
+        <div class="ai-grid">
+          <div class="ai-mini">
+            <strong>Ana ICD</strong>
+            <div id="ai-icd-kod">-</div>
+            <div class="ai-muted" id="ai-icd-ad">-</div>
+          </div>
+          <div class="ai-mini">
+            <strong>Güven</strong>
+            <div id="ai-confidence-text">-</div>
+            <div class="ai-muted">eşleşme skoru</div>
+          </div>
+          <div class="ai-mini">
+            <strong>Açıklama</strong>
+            <div id="ai-aciklama" style="font-size:.95rem;line-height:1.35;">-</div>
+          </div>
+        </div>
+
+        <div style="margin-top:8px;">
+          <strong style="display:block;margin-bottom:6px;color:#334155;">ICD Adayları</strong>
+          <div id="ai-icd-adaylari" class="ai-muted">Henüz analiz yapılmadı.</div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <strong style="display:block;margin-bottom:6px;color:#334155;">AI SUT Önerileri</strong>
+          <ul id="ai-sut-listesi" class="ai-list"></ul>
+        </div>
+      </div>
+
+      <div id="canli-risk-kutu"></div>
+
+      <button type="button" id="onerBtn">🧠 AI İşlem Öner</button>
+      <div id="onerilerKutu"></div>
+
+      <button type="submit" id="btn" <%= (!myProviders || !myProviders.length) ? "disabled" : "" %>>
+        ▶ Provizyon Al
+      </button>
+    </form>
+  </div>
+
+  <div id="log-kutu"></div>
+  <div id="sonuc-kutu"></div>
+</div>
+
+<script>
+  const SUT_TABLOSU = <%- JSON.stringify(sutTablosu) %>;
+
+  const islemAdiInput = document.getElementById("islem_adi");
+  const islemKoduInput = document.getElementById("islem_kodu");
+  const sutOneriler = document.getElementById("sut-oneriler");
+  const icdBilgi = document.getElementById("icd-bilgi");
+  const hastaGetirBtn = document.getElementById("hastaGetirBtn");
+  const hbysDurum = document.getElementById("hbys-durum");
+  const hbysKlinikKutu = document.getElementById("hbys-klinik-kutu");
+  const onerBtn = document.getElementById("onerBtn");
+  const onerilerKutu = document.getElementById("onerilerKutu");
+  const canliRiskKutu = document.getElementById("canli-risk-kutu");
+  const doktorNotuInput = document.getElementById("doktor_notu");
+
+  const aiIcdPanel = document.getElementById("ai-icd-panel");
+  const aiIcdKod = document.getElementById("ai-icd-kod");
+  const aiIcdAd = document.getElementById("ai-icd-ad");
+  const aiConfidenceText = document.getElementById("ai-confidence-text");
+  const aiAciklama = document.getElementById("ai-aciklama");
+  const aiIcdAdaylari = document.getElementById("ai-icd-adaylari");
+  const aiSutListesi = document.getElementById("ai-sut-listesi");
+
+  const hiddenAiIcdKodu = document.getElementById("ai_icd_kodu");
+  const hiddenAiIcdAd = document.getElementById("ai_icd_ad");
+  const hiddenAiConfidence = document.getElementById("ai_confidence");
+  const hiddenAiOnerilenSutlar = document.getElementById("ai_onerilen_sutlar");
+  const hiddenAiSeciliOneriKodu = document.getElementById("ai_secili_oneri_kodu");
+  const hiddenAiSeciliOneriAd = document.getElementById("ai_secili_oneri_ad");
+
+  let aiTimer = null;
+
+  function escapeHtml(s) {
+    return String(s || "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function confidenceClass(value) {
+    const n = Number(value || 0);
+    if (n >= 0.8) return "confidence-good";
+    if (n >= 0.5) return "confidence-mid";
+    return "confidence-low";
+  }
+
+  function formatPercent(value) {
+    return `${Math.round(Number(value || 0) * 100)}%`;
+  }
+
+  function hbysMesajYaz(metin, hata = false) {
+    hbysDurum.style.display = "block";
+    hbysDurum.textContent = metin;
+    hbysDurum.style.background = hata ? "#fdecec" : "#eef6ff";
+    hbysDurum.style.color = hata ? "#b42318" : "#174ea6";
+    hbysDurum.style.borderColor = hata ? "#f5c2c7" : "#cfe2ff";
+  }
+
+  function oneriMesajYaz(html, hata = false) {
+    onerilerKutu.style.display = "block";
+    onerilerKutu.innerHTML = html;
+    onerilerKutu.style.background = hata ? "#fff1f2" : "#ecfeff";
+    onerilerKutu.style.color = hata ? "#be123c" : "#115e59";
+    onerilerKutu.style.borderColor = hata ? "#fecdd3" : "#99f6e4";
+  }
+
+  function riskKutuGoster(html, renk = "sari") {
+    canliRiskKutu.style.display = "block";
+    canliRiskKutu.innerHTML = html;
+
+    if (renk === "kirmizi") {
+      canliRiskKutu.style.background = "#fdecec";
+      canliRiskKutu.style.color = "#b42318";
+      canliRiskKutu.style.border = "1px solid #f5c2c7";
+    } else if (renk === "yesil") {
+      canliRiskKutu.style.background = "#ecfdf3";
+      canliRiskKutu.style.color = "#166534";
+      canliRiskKutu.style.border = "1px solid #bbf7d0";
+    } else {
+      canliRiskKutu.style.background = "#fff8db";
+      canliRiskKutu.style.color = "#856404";
+      canliRiskKutu.style.border = "1px solid #fce588";
+    }
+  }
+
+  function hbysKlinikKutuTemizle() {
+    hbysKlinikKutu.style.display = "none";
+    hbysKlinikKutu.innerHTML = "";
+  }
+
+  function kritikLabAnaliziYap(labSonuclari = []) {
+    const kritikler = [];
+
+    for (const lab of labSonuclari) {
+      const flag = String(lab?.flag || "").trim().toLowerCase();
+
+      if (["high", "h", "critical-high", "critical_high"].includes(flag)) {
+        kritikler.push({ ...lab, seviye: "high" });
+        continue;
+      }
+
+      if (["low", "l", "critical-low", "critical_low"].includes(flag)) {
+        kritikler.push({ ...lab, seviye: "low" });
+        continue;
+      }
+    }
+
+    return kritikler;
+  }
+
+  function hbysKlinikKutuGoster(data) {
+    const klinikOzet = data?.klinikOzet || "Klinik özet bulunamadı.";
+    const riskIsaretleri = Array.isArray(data?.riskIsaretleri) ? data.riskIsaretleri : [];
+    const teshisler = Array.isArray(data?.teshisler) ? data.teshisler : [];
+    const ilaclar = Array.isArray(data?.ilaclar) ? data.ilaclar : [];
+    const labSonuclari = Array.isArray(data?.labSonuclari) ? data.labSonuclari : [];
+    const goruntulemeler = Array.isArray(data?.goruntulemeler) ? data.goruntulemeler : [];
+    const prosedurler = Array.isArray(data?.prosedurler) ? data.prosedurler : [];
+
+    const kritikLablar = kritikLabAnaliziYap(labSonuclari);
+
+    const teshisHtml = teshisler.length
+      ? teshisler.slice(0, 6).map(x =>
+          `<span class="hbys-chip">${escapeHtml(x.kod || "-")} - ${escapeHtml(x.ad || "-")}</span>`
+        ).join("")
+      : '<span class="ai-muted">Tanı verisi yok</span>';
+
+    const ilacHtml = ilaclar.length
+      ? ilaclar.slice(0, 6).map(x =>
+          `<span class="hbys-chip">${escapeHtml(x.ilac || x.ad || "-")}</span>`
+        ).join("")
+      : '<span class="ai-muted">İlaç verisi yok</span>';
+
+    const labHtml = labSonuclari.length
+      ? `<ul class="hbys-mini-list">${labSonuclari.slice(0, 5).map(x => {
+          const flag = String(x.flag || "").trim().toLowerCase();
+          const cls =
+            ["high", "h", "critical-high", "critical_high"].includes(flag)
+              ? "hbys-lab-high"
+              : ["low", "l", "critical-low", "critical_low"].includes(flag)
+                ? "hbys-lab-low"
+                : "";
+
+          const flagText =
+            ["high", "h", "critical-high", "critical_high"].includes(flag)
+              ? " ↑"
+              : ["low", "l", "critical-low", "critical_low"].includes(flag)
+                ? " ↓"
+                : "";
+
+          return `<li>${escapeHtml(x.test || "-")}: <strong class="${cls}">${escapeHtml(x.deger || "-")}${flagText}</strong>${x.birim ? ` ${escapeHtml(x.birim)}` : ""}</li>`;
+        }).join("")}</ul>`
+      : '<div class="ai-muted">Lab verisi yok</div>';
+
+    const goruntulemeHtml = goruntulemeler.length
+      ? `<ul class="hbys-mini-list">${goruntulemeler.slice(0, 4).map(x =>
+          `<li><strong>${escapeHtml(x.tur || "-")}</strong>${x.bolge ? ` (${escapeHtml(x.bolge)})` : ""}: ${escapeHtml(x.sonuc || "-")}</li>`
+        ).join("")}</ul>`
+      : '<div class="ai-muted">Görüntüleme verisi yok</div>';
+
+    const prosedurHtml = prosedurler.length
+      ? `<ul class="hbys-mini-list">${prosedurler.slice(0, 4).map(x =>
+          `<li>${escapeHtml(x.kod || "-")} - ${escapeHtml(x.ad || "-")}</li>`
+        ).join("")}</ul>`
+      : '<div class="ai-muted">Prosedür verisi yok</div>';
+
+    const riskHtml = riskIsaretleri.length
+      ? `<ul class="hbys-mini-list">${riskIsaretleri.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul>`
+      : '<div class="ai-muted">Klinik risk işareti bulunmadı</div>';
+
+    const kritikLabHtml = kritikLablar.length
+      ? `
+        <div class="hbys-alert red">
+          <strong>🚨 Kritik laboratuvar uyarısı</strong>
+          <div style="margin-top:6px;">
+            ${kritikLablar.slice(0, 4).map(x =>
+              `${escapeHtml(x.test || "-")}: ${escapeHtml(x.deger || "-")}${x.birim ? ` ${escapeHtml(x.birim)}` : ""}`
+            ).join(" | ")}
+          </div>
+        </div>
+      `
+      : "";
+
+    const klinikRiskHtml =
+      !kritikLablar.length && riskIsaretleri.length
+        ? `
+          <div class="hbys-alert yellow">
+            <strong>⚠️ Klinik risk işareti bulundu</strong>
+            <div style="margin-top:6px;">
+              ${riskIsaretleri.slice(0, 3).map(escapeHtml).join(" | ")}
+            </div>
+          </div>
+        `
+        : "";
+
+    hbysKlinikKutu.innerHTML = `
+      <h3>🧾 HBYS Klinik Özeti</h3>
+      ${kritikLabHtml}
+      ${klinikRiskHtml}
+      <p><strong>Kaynak:</strong> ${escapeHtml(data?.kaynak || "FHIR_MOCK")}</p>
+      <p><strong>Özet:</strong> ${escapeHtml(klinikOzet)}</p>
+
+      <div style="margin-top:10px;">
+        <strong style="display:block;margin-bottom:6px;">Tanılar</strong>
+        <div>${teshisHtml}</div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <strong style="display:block;margin-bottom:6px;">İlaçlar</strong>
+        <div>${ilacHtml}</div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <strong style="display:block;margin-bottom:6px;">Laboratuvar</strong>
+        ${labHtml}
+      </div>
+
+      <div style="margin-top:10px;">
+        <strong style="display:block;margin-bottom:6px;">Görüntüleme</strong>
+        ${goruntulemeHtml}
+      </div>
+
+      <div style="margin-top:10px;">
+        <strong style="display:block;margin-bottom:6px;">Yakın Prosedürler</strong>
+        ${prosedurHtml}
+      </div>
+
+      <div style="margin-top:10px;">
+        <strong style="display:block;margin-bottom:6px;">Risk İşaretleri</strong>
+        ${riskHtml}
+      </div>
+    `;
+
+    hbysKlinikKutu.style.display = "block";
+  }
+
+  function aiHiddenAlanlariTemizle() {
+    hiddenAiIcdKodu.value = "";
+    hiddenAiIcdAd.value = "";
+    hiddenAiConfidence.value = "";
+    hiddenAiOnerilenSutlar.value = "[]";
+    hiddenAiSeciliOneriKodu.value = "";
+    hiddenAiSeciliOneriAd.value = "";
+  }
+
+  function aiSonucuHiddenAlanlaraYaz(veri) {
+    hiddenAiIcdKodu.value = veri?.icd?.icd || "";
+    hiddenAiIcdAd.value = veri?.icd?.ad || "";
+    hiddenAiConfidence.value = String(veri?.confidence ?? "");
+    hiddenAiOnerilenSutlar.value = JSON.stringify(veri?.oneriler || []);
+  }
+
+  function icdGoster(sutKodu) {
+    const kayit = SUT_TABLOSU[sutKodu];
+    if (!kayit) {
+      icdBilgi.style.display = "none";
+      return;
+    }
+
+    document.getElementById("icd-kodlar").innerHTML =
+      kayit.icd10Kodlar.map(k =>
+        `<span class="icd-tag">${escapeHtml(k)} — ${escapeHtml(kayit.icd10Aciklamalar.find(a => a.kod === k)?.ad || "")}</span>`
+      ).join("") || "<span style='color:#888'>ICD-10 kodu tanımlı değil</span>";
+
+    document.getElementById("icd-aciklama").textContent = kayit.aciklama || "";
+
+    document.getElementById("icd-belgeler").innerHTML =
+      kayit.belgeler.length
+        ? "<strong>Gerekli Belgeler:&nbsp;</strong>" + kayit.belgeler.map(b => `<span class="belge-tag">📄 ${escapeHtml(b)}</span>`).join("")
+        : "";
+
+    icdBilgi.style.display = "block";
+  }
+
+  function aiPanelTemizle() {
+    aiIcdPanel.style.display = "none";
+    aiIcdKod.textContent = "-";
+    aiIcdAd.textContent = "-";
+    aiConfidenceText.textContent = "-";
+    aiConfidenceText.className = "";
+    aiAciklama.textContent = "-";
+    aiIcdAdaylari.innerHTML = '<span class="ai-muted">Henüz analiz yapılmadı.</span>';
+    aiSutListesi.innerHTML = "";
+    aiHiddenAlanlariTemizle();
+  }
+
+  async function aiIcdSutAnaliziYap() {
+    const doktorNotu = doktorNotuInput.value.trim();
+    const dogum = document.querySelector('input[name="dogum"]').value.trim();
+
+    if (!doktorNotu) {
+      aiPanelTemizle();
+      return;
+    }
+
+    try {
+      const resp = await fetch("/api/icd-sut-oner", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          doktorNotu,
+          dogum
+        })
+      });
+
+      const data = await resp.json();
+
+      if (!resp.ok || !data.ok) {
+        aiPanelTemizle();
+        return;
+      }
+
+      const veri = data.veri || {};
+      aiSonucuHiddenAlanlaraYaz(veri);
+
+      aiIcdKod.textContent = veri.icd?.icd || "-";
+      aiIcdAd.textContent = veri.icd?.ad || "ICD bulunamadı";
+      aiConfidenceText.textContent = formatPercent(veri.confidence || 0);
+      aiConfidenceText.className = confidenceClass(veri.confidence || 0);
+      aiAciklama.textContent = veri.aciklama || "-";
+
+      const adaylar = Array.isArray(veri.icdAdaylari) ? veri.icdAdaylari : [];
+      if (!adaylar.length) {
+        aiIcdAdaylari.innerHTML = '<span class="ai-muted">ICD adayı bulunamadı.</span>';
+      } else {
+        aiIcdAdaylari.innerHTML = adaylar.map((x) =>
+          `<span class="ai-chip">${escapeHtml(x.icd)} - ${escapeHtml(x.ad)} (${formatPercent(x.confidence)})</span>`
+        ).join("");
+      }
+
+      const oneriler = Array.isArray(veri.oneriler) ? veri.oneriler : [];
+      if (!oneriler.length) {
+        aiSutListesi.innerHTML = "<li>Uygun SUT önerisi bulunamadı.</li>";
+      } else {
+        aiSutListesi.innerHTML = oneriler.map((x) => `
+          <li>
+            <strong>${escapeHtml(x.kod || "-")} - ${escapeHtml(x.ad || "-")}</strong>
+            ${x.aciklama ? `<div class="ai-muted">${escapeHtml(x.aciklama)}</div>` : ""}
+            ${Array.isArray(x.belgeler) && x.belgeler.length
+              ? `<div class="ai-muted">Belgeler: ${x.belgeler.map(escapeHtml).join(", ")}</div>`
+              : ""}
+            <button type="button" class="ai-apply-btn" data-kod="${escapeHtml(x.kod || "")}" data-ad="${escapeHtml(x.ad || "")}">
+              SUT Kodunu Forma Aktar
+            </button>
+          </li>
+        `).join("");
+      }
+
+      aiIcdPanel.style.display = "block";
+    } catch (_e) {
+      aiPanelTemizle();
+    }
+  }
+
+  function aiAnalizPlanla() {
+    clearTimeout(aiTimer);
+    aiTimer = setTimeout(() => {
+      aiIcdSutAnaliziYap();
+    }, 500);
+  }
+
+  async function canliRiskTahminiYap() {
+    const tc = document.querySelector('input[name="tc"]').value.trim();
+    const ad = document.querySelector('input[name="ad"]').value.trim();
+    const dogum = document.querySelector('input[name="dogum"]').value.trim();
+    const provider = document.querySelector('select[name="provider"]').value.trim();
+    const islem_kodu = document.querySelector('input[name="islem_kodu"]').value.trim();
+    const islem_adi = document.querySelector('input[name="islem_adi"]').value.trim();
+    const doktor_notu = document.querySelector('textarea[name="doktor_notu"]').value.trim();
+
+    if (!tc || !ad || !dogum || !islem_adi || !provider) {
+      canliRiskKutu.style.display = "none";
+      return;
+    }
+
+    try {
+      const [learningResp, klasikResp] = await Promise.all([
+        fetch("/api/ai/risk-check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({
+            islem_kodu,
+            provider,
+            doktor_notu,
+            dogum
+          })
+        }),
+        fetch("/api/red-tahmin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({
+            tc, ad, dogum, islem_kodu, islem_adi, doktorNotu: doktor_notu
+          })
+        })
+      ]);
+
+      const learningData = await learningResp.json().catch(() => ({}));
+      const klasikData = await klasikResp.json().catch(() => ({}));
+
+      if (!learningResp.ok || !learningData.ok) {
+        canliRiskKutu.style.display = "none";
+        return;
+      }
+
+      const yuzde = Math.round((learningData.risk || 0) * 100);
+      const reasons = Array.isArray(learningData.reasons) ? learningData.reasons : [];
+      const topReasons = Array.isArray(learningData.topReasons) ? learningData.topReasons : [];
+      const topMissingDocs = Array.isArray(learningData.topMissingDocs) ? learningData.topMissingDocs : [];
+      const eksikBelgeler = Array.isArray(klasikData?.eksikBelgeler) ? klasikData.eksikBelgeler : [];
+
+      let renk = "sari";
+      if (learningData.seviye === "YÜKSEK") renk = "kirmizi";
+      else if (learningData.seviye === "DÜŞÜK") renk = "yesil";
+
+      const klasikInfo = klasikData?.ok
+        ? `<p><strong>Klasik AI öneri:</strong> ${escapeHtml(klasikData.oneri || "—")}</p>`
+        : "";
+
+      const eksikBelgelerHtml =
+        eksikBelgeler.length
+          ? `<p><strong>Eksik Belgeler:</strong> ${escapeHtml(eksikBelgeler.join(", "))}</p>`
+          : topMissingDocs.length
+            ? `<p><strong>Sık eksik belgeler:</strong> ${topMissingDocs.map(x => `${escapeHtml(x.belge)} (${x.adet})`).join(", ")}</p>`
+            : `<p><strong>Eksik Belgeler:</strong> —</p>`;
+
+      const redNedenleriHtml = topReasons.length
+        ? `<p><strong>En sık red nedenleri:</strong> ${topReasons.map(x => `${escapeHtml(x.neden)} (${x.adet})`).join(", ")}</p>`
+        : "";
+
+      const nedenlerHtml = reasons.length
+        ? `<details style="margin-top:8px;"><summary>Detaylı risk nedenleri</summary><ul class="neden-listesi">${reasons.map(n => `<li>${escapeHtml(n)}</li>`).join("")}</ul></details>`
+        : "";
+
+      riskKutuGoster(`
+        <h3>📡 Öğrenen AI Risk Tahmini</h3>
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>Risk Seviyesi</strong>
+            <div>${escapeHtml(learningData.seviye || "-")} (%${yuzde})</div>
+          </div>
+          <div class="mini-card">
+            <strong>İşlem Geçmişi</strong>
+            <div>${learningData.procStats ? `${learningData.procStats.red}/${learningData.procStats.toplam} RED` : "-"}</div>
+          </div>
+          <div class="mini-card">
+            <strong>Provider Geçmişi</strong>
+            <div>${learningData.providerStats ? `${learningData.providerStats.red}/${learningData.providerStats.toplam} RED` : "-"}</div>
+          </div>
+        </div>
+        ${klasikInfo}
+        ${eksikBelgelerHtml}
+        ${redNedenleriHtml}
+        ${nedenlerHtml}
+      `, renk);
+    } catch (_e) {
+      canliRiskKutu.style.display = "none";
+    }
+  }
+
+  islemKoduInput.addEventListener("input", () => {
+    icdGoster(islemKoduInput.value.trim());
+  });
+
+  islemAdiInput.addEventListener("input", () => {
+    const ara = islemAdiInput.value.toLowerCase().trim();
+    if (ara.length < 2) {
+      sutOneriler.style.display = "none";
+      return;
+    }
+
+    const eslesme = Object.entries(SUT_TABLOSU)
+      .filter(([, v]) => v.ad.toLowerCase().includes(ara))
+      .slice(0, 6);
+
+    if (!eslesme.length) {
+      sutOneriler.style.display = "none";
+      return;
+    }
+
+    sutOneriler.innerHTML = eslesme.map(([kod, v]) =>
+      `<div data-kod="${escapeHtml(kod)}" data-ad="${escapeHtml(v.ad)}">${escapeHtml(v.ad)} <span style="color:#888;font-size:.8rem">${escapeHtml(kod)}</span></div>`
+    ).join("");
+    sutOneriler.style.display = "block";
+  });
+
+  sutOneriler.addEventListener("click", (e) => {
+    const div = e.target.closest("div[data-kod]");
+    if (!div) return;
+    islemKoduInput.value = div.dataset.kod;
+    islemAdiInput.value = div.dataset.ad;
+    sutOneriler.style.display = "none";
+    icdGoster(div.dataset.kod);
+    canliRiskTahminiYap();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!sutOneriler.contains(e.target) && e.target !== islemAdiInput) {
+      sutOneriler.style.display = "none";
+    }
+  });
+
+  if (hastaGetirBtn) {
+    hastaGetirBtn.addEventListener("click", async () => {
+      const tcEl = document.querySelector('input[name="tc"]');
+      const adEl = document.querySelector('input[name="ad"]');
+      const dogumEl = document.querySelector('input[name="dogum"]');
+      const notEl = document.querySelector('textarea[name="doktor_notu"]');
+
+      const tc = tcEl.value.trim();
+      if (!tc) {
+        hbysKlinikKutuTemizle();
+        hbysMesajYaz("Önce TC gir.", true);
+        return;
+      }
+
+      try {
+        hbysMesajYaz("HBYS/FHIR katmanından hasta bilgileri getiriliyor...");
+
+        const resp = await fetch(`/api/hasta/${tc}`);
+        const data = await resp.json();
+
+        if (!resp.ok || !data.ok) {
+          hbysKlinikKutuTemizle();
+          hbysMesajYaz(data.hata || "Hasta verisi bulunamadı.", true);
+          return;
+        }
+
+        adEl.value = data.hasta?.ad || "";
+        dogumEl.value = data.hasta?.dogum || "";
+
+        if (!notEl.value && data.doktorNotu) {
+          notEl.value = data.doktorNotu;
+        }
+
+        hbysKlinikKutuGoster(data);
+        hbysMesajYaz(`Hasta bilgileri ${data.kaynak || "FHIR_MOCK"} kaynağından dolduruldu.`);
+        aiAnalizPlanla();
+        canliRiskTahminiYap();
+      } catch (_err) {
+        hbysKlinikKutuTemizle();
+        hbysMesajYaz("HBYS bağlantısı sırasında hata oluştu.", true);
+      }
+    });
+  }
+
+  if (onerBtn) {
+    onerBtn.addEventListener("click", async () => {
+      const not = doktorNotuInput.value.trim();
+
+      if (!not) {
+        oneriMesajYaz("Önce doktor notu gir.", true);
+        return;
+      }
+
+      try {
+        oneriMesajYaz("AI işlem önerileri hazırlanıyor...");
+
+        const resp = await fetch("/api/islem-oneri", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ doktorNotu: not })
+        });
+
+        const data = await resp.json();
+
+        if (!resp.ok || !data.ok || !data.oneriler?.length) {
+          oneriMesajYaz("Uygun işlem önerisi bulunamadı.", true);
+          return;
+        }
+
+        oneriMesajYaz(`
+          <h3>🧠 AI İşlem Önerileri</h3>
+          ${data.oneriler.map(o => `
+            <div class="oner-item" data-kod="${escapeHtml(o.kod)}" data-ad="${escapeHtml(o.ad)}">
+              <strong>${escapeHtml(o.ad)}</strong>
+              <div style="color:#0f766e;font-size:.85rem">${escapeHtml(o.kod)}</div>
+            </div>
+          `).join("")}
+        `);
+      } catch (_e) {
+        oneriMesajYaz("İşlem önerisi alınırken hata oluştu.", true);
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      const item = e.target.closest(".oner-item");
+      if (!item) return;
+
+      islemKoduInput.value = item.dataset.kod;
+      islemAdiInput.value = item.dataset.ad;
+      hiddenAiSeciliOneriKodu.value = item.dataset.kod || "";
+      hiddenAiSeciliOneriAd.value = item.dataset.ad || "";
+      icdGoster(item.dataset.kod);
+      canliRiskTahminiYap();
+
+      oneriMesajYaz(`✅ <strong>${escapeHtml(item.dataset.ad)}</strong> seçildi. SUT kodu otomatik dolduruldu.`);
+    });
+  }
+
+  aiSutListesi.addEventListener("click", (e) => {
+    const btn = e.target.closest(".ai-apply-btn");
+    if (!btn) return;
+
+    islemKoduInput.value = btn.dataset.kod;
+    islemAdiInput.value = btn.dataset.ad;
+    hiddenAiSeciliOneriKodu.value = btn.dataset.kod || "";
+    hiddenAiSeciliOneriAd.value = btn.dataset.ad || "";
+    icdGoster(btn.dataset.kod);
+    canliRiskTahminiYap();
+
+    oneriMesajYaz(`✅ <strong>${escapeHtml(btn.dataset.ad)}</strong> AI panelinden seçildi. SUT kodu forma aktarıldı.`);
+  });
+
+  document.querySelector('input[name="tc"]').addEventListener("blur", canliRiskTahminiYap);
+  document.querySelector('input[name="ad"]').addEventListener("blur", canliRiskTahminiYap);
+  document.querySelector('select[name="provider"]').addEventListener("change", canliRiskTahminiYap);
+  document.querySelector('input[name="dogum"]').addEventListener("blur", () => {
+    aiAnalizPlanla();
+    canliRiskTahminiYap();
+  });
+  document.querySelector('input[name="islem_kodu"]').addEventListener("blur", canliRiskTahminiYap);
+  document.querySelector('input[name="islem_adi"]').addEventListener("blur", canliRiskTahminiYap);
+  doktorNotuInput.addEventListener("input", aiAnalizPlanla);
+  doktorNotuInput.addEventListener("blur", () => {
+    aiAnalizPlanla();
+    canliRiskTahminiYap();
+  });
+
+  const jobId = <%- JSON.stringify(jobId) %>;
+
+  function renderGerekcePdf(gerekcePdf) {
+    if (!gerekcePdf || !gerekcePdf.filePath) return "";
+
+    const rawPath = String(gerekcePdf.filePath || "");
+    const normalizedPath = rawPath.replaceAll("\\", "/");
+    const parts = normalizedPath.split("/");
+    const fileName = parts[parts.length - 1] || "";
+
+    if (!fileName) return "";
+
+    return `
+      <div class="uyari" style="margin-top:12px;background:#eef6ff;color:#174ea6;border:1px solid #cfe2ff;">
+        <h3>📄 AI Gerekçe PDF</h3>
+        <p><strong>Belge No:</strong> ${escapeHtml(gerekcePdf.belgeNo || "-")}</p>
+        <a class="pdf-link" href="/generated_docs/${encodeURIComponent(fileName)}" target="_blank" rel="noopener noreferrer">
+          PDF İndir / Aç
+        </a>
+      </div>
+    `;
+  }
+
+  function renderAiRapor(rapor) {
+    if (!rapor) return "";
+
+    const eksik = (rapor.eksikBelgeler || []).length ? rapor.eksikBelgeler.join(", ") : "—";
+    const yuzde = (rapor.finalRisk != null) ? Math.round(rapor.finalRisk * 100) : "—";
+    const gerekce = rapor.gerekce?.gerekceMetni || rapor.gerekce?.gerekce || null;
+    const nedenler = (rapor.nedenler || []).length
+      ? `<ul class="neden-listesi">${rapor.nedenler.map(n => `<li>${escapeHtml(n)}</li>`).join("")}</ul>`
+      : "<p><strong>Neden:</strong> Standart işlem akışı.</p>";
+    const ogrenme = rapor.ogrenmePuani
+      ? `<p><strong>Self-Learning Etkisi:</strong> ${escapeHtml(Math.round(rapor.ogrenmePuani * 100))}%</p>`
+      : "";
+
+    const icdBilgiHtml =
+      rapor.icdKodu || rapor.icdAd
+        ? `<p><strong>ICD:</strong> ${escapeHtml(rapor.icdKodu || "-")}${rapor.icdAd ? ` - ${escapeHtml(rapor.icdAd)}` : ""}</p>`
+        : "";
+
+    return `
+      <div class="uyari" style="margin-top:12px;">
+        <h3>🧠 AI Analiz</h3>
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>Risk</strong>
+            <div>${escapeHtml(rapor.seviye)} (%${escapeHtml(yuzde)})</div>
+          </div>
+          <div class="mini-card">
+            <strong>ML Skoru</strong>
+            <div>${rapor.mlSkoru != null ? `%${Math.round(rapor.mlSkoru * 100)}` : "-"}</div>
+          </div>
+          <div class="mini-card">
+            <strong>LLM Skoru</strong>
+            <div>${rapor.aiSkoru != null ? `%${Math.round(rapor.aiSkoru * 100)}` : "-"}</div>
+          </div>
+        </div>
+        ${icdBilgiHtml}
+        <p><strong>Öneri:</strong> ${escapeHtml(rapor.oneri || "—")}</p>
+        <p><strong>Eksik Belgeler:</strong> ${escapeHtml(eksik)}</p>
+        ${ogrenme}
+        <details style="margin-top:8px;">
+          <summary>Detaylı analiz nedenleri</summary>
+          ${nedenler}
+        </details>
+        ${gerekce ? `<details><summary>📝 Gerekçe Taslağı</summary><pre>${escapeHtml(gerekce)}</pre></details>` : ""}
+      </div>`;
+  }
+
+  function renderRedCozum(redCozum) {
+    if (!redCozum) return "";
+
+    const nedenler = (redCozum.nedenler || []).map(n => `<li>${escapeHtml(n)}</li>`).join("");
+    const sutlar = (redCozum.alternatifSutlar || []).map(s =>
+      `<li><strong>${escapeHtml(s.kod)}</strong> — ${escapeHtml(s.ad)}</li>`
+    ).join("");
+    const notlar = (redCozum.doktorNotuOnerileri || []).map(n => `<li>${escapeHtml(n)}</li>`).join("");
+    const belgeler = (redCozum.belgeOnerileri || []).map(b => `<li>${escapeHtml(b)}</li>`).join("");
+
+    return `
+      <div class="uyari" style="margin-top:12px;background:#eef6ff;color:#174ea6;border:1px solid #cfe2ff;">
+        <h3>🛠 AI RED Çözüm Önerisi</h3>
+        <p><strong>Hata:</strong> ${escapeHtml(redCozum.hataKodu || "—")} - ${escapeHtml(redCozum.hataMesaji || "—")}</p>
+        ${nedenler ? `<details open><summary>Muhtemel Nedenler</summary><ul class="neden-listesi">${nedenler}</ul></details>` : ""}
+        ${sutlar ? `<details><summary>Alternatif SUT Kodları</summary><ul class="neden-listesi">${sutlar}</ul></details>` : ""}
+        ${notlar ? `<details><summary>Doktor Notu İyileştirme</summary><ul class="neden-listesi">${notlar}</ul></details>` : ""}
+        ${belgeler ? `<details><summary>Önerilen Belgeler</summary><ul class="neden-listesi">${belgeler}</ul></details>` : ""}
+      </div>
+    `;
+  }
+
+  function renderRetryBilgi(retryBilgi) {
+    if (!retryBilgi || !retryBilgi.denendi) return "";
+
+    const yeniIslem = retryBilgi.yeniIslem
+      ? `${escapeHtml(retryBilgi.yeniIslem.kodu || "—")} - ${escapeHtml(retryBilgi.yeniIslem.adi || "—")}`
+      : "—";
+
+    const durum = escapeHtml(retryBilgi.retryDurum || "—");
+    const takipNo = escapeHtml(retryBilgi.retryTakipNo || "—");
+    const hata = retryBilgi.retryHataMesaji
+      ? `<p><strong>Retry Hata:</strong> ${escapeHtml(retryBilgi.retryHataMesaji)}</p>`
+      : "";
+
+    const basarili = String(retryBilgi.retryDurum || "").toUpperCase().includes("ONAY");
+
+    return `
+      <div class="${basarili ? "basarili" : "uyari"}" style="margin-top:12px;">
+        <h3>🔁 Otomatik Yeniden Deneme</h3>
+        <p><strong>Yeni SUT:</strong> ${yeniIslem}</p>
+        <p><strong>Retry Sonuç:</strong> ${durum}</p>
+        <p><strong>Retry Takip No:</strong> ${takipNo}</p>
+        ${hata}
+      </div>
+    `;
+  }
+
+  function renderSonucOzeti(r) {
+    const aiContext = r.aiContext || {};
+    const finalIslem = r.finalIslem || {};
+    const klinikVeri = r.klinikVeri || {};
+    const imzaKaydi = r.imzaKaydi || null;
+
+    const icdKodu = r.rapor?.icdKodu || aiContext.icdKodu || "";
+    const icdAd = r.rapor?.icdAd || aiContext.icdAd || "";
+
+    const secilenSut =
+      finalIslem?.kodu || finalIslem?.adi
+        ? `${finalIslem.kodu || "-"}${finalIslem.adi ? ` - ${finalIslem.adi}` : ""}`
+        : aiContext.seciliOneriKodu
+          ? `${aiContext.seciliOneriKodu}${aiContext.seciliOneriAd ? ` - ${aiContext.seciliOneriAd}` : ""}`
+          : "—";
+
+    const riskIsaretleriHtml =
+      Array.isArray(klinikVeri.riskIsaretleri) && klinikVeri.riskIsaretleri.length
+        ? `<details style="margin-top:8px;"><summary>Klinik risk işaretleri</summary><ul class="neden-listesi">${klinikVeri.riskIsaretleri.map(x => `<li>${escapeHtml(x)}</li>`).join("")}</ul></details>`
+        : "";
+
+    const klinikOzetHtml = klinikVeri.klinikOzet
+      ? `<details style="margin-top:8px;"><summary>Klinik özet</summary><div class="muted" style="margin-top:8px;">${escapeHtml(klinikVeri.klinikOzet)}</div></details>`
+      : "";
+
+    const imzaHtml = imzaKaydi
+      ? `<p style="margin-top:8px;"><strong>İmza:</strong> ${escapeHtml(imzaKaydi.sertifikaNo || imzaKaydi.imzaId || "Mevcut")}</p>`
+      : "";
+
+    return `
+      <div class="mini-grid">
+        <div class="mini-card">
+          <strong>Sonuç</strong>
+          <div>${escapeHtml(r.sonuc || "-")}</div>
+        </div>
+        <div class="mini-card">
+          <strong>Süre</strong>
+          <div>${r.elapsedMs != null ? `${(r.elapsedMs / 1000).toFixed(2)}s` : "-"}</div>
+        </div>
+        <div class="mini-card">
+          <strong>ICD</strong>
+          <div>${escapeHtml(icdKodu || "-")}${icdAd ? ` - ${escapeHtml(icdAd)}` : ""}</div>
+        </div>
+        <div class="mini-card">
+          <strong>Final SUT</strong>
+          <div>${escapeHtml(secilenSut)}</div>
+        </div>
+        <div class="mini-card">
+          <strong>HBYS Kaynağı</strong>
+          <div>${escapeHtml(klinikVeri.kaynak || "-")}</div>
+        </div>
+        <div class="mini-card">
+          <strong>Retry</strong>
+          <div>${r.retryBilgi?.denendi ? "Denendi" : "Yok"}</div>
+        </div>
+      </div>
+      ${imzaHtml}
+      ${klinikOzetHtml}
+      ${riskIsaretleriHtml}
+    `;
+  }
+
+  if (jobId) {
+    const logKutu = document.getElementById("log-kutu");
+    const sonucKutu = document.getElementById("sonuc-kutu");
+    const btn = document.getElementById("btn");
+
+    logKutu.style.display = "block";
+    btn.disabled = true;
+    btn.textContent = "⏳ İşleniyor...";
+
+    const es = new EventSource("/api/events/" + jobId);
+
+    function finalizeUi() {
+      btn.disabled = false;
+      btn.textContent = "▶ Provizyon Al";
+    }
+
+    es.addEventListener("log", (e) => {
+      const data = JSON.parse(e.data);
+
+      logKutu.innerHTML += escapeHtml(data.message || data.line) + "<br>";
+      logKutu.scrollTop = logKutu.scrollHeight;
+    });
+
+    es.addEventListener("failed", (e) => {
+      const data = JSON.parse(e.data);
+
+      es.close();
+      finalizeUi();
+
+      sonucKutu.innerHTML = `
+        <div class="kirmizi">
+          <h3>❌ İşlem Hatası</h3>
+          <p>${escapeHtml(data.error || "Bilinmeyen hata")}</p>
+        </div>`;
+    });
+
+    es.addEventListener("done", (e) => {
+      const data = JSON.parse(e.data);
+
+      es.close();
+      finalizeUi();
+
+      const r = data.result || {};
+
+      if (r.needsHuman) {
+        sonucKutu.innerHTML = `
+          <div class="insan">
+            <h3>⚠️ İnsan Müdahalesi Gerekiyor</h3>
+            <p>Captcha veya 2FA tespit edildi.</p>
+            ${renderSonucOzeti(r)}
+          </div>`;
+        sonucKutu.innerHTML += renderAiRapor(r.rapor);
+        sonucKutu.innerHTML += renderRedCozum(r.redCozum);
+        sonucKutu.innerHTML += renderRetryBilgi(r.retryBilgi);
+        sonucKutu.innerHTML += renderGerekcePdf(r.gerekcePdf || r.rapor?.gerekcePdf);
+        return;
+      }
+
+      if (r.hata) {
+        sonucKutu.innerHTML = `
+          <div class="kirmizi">
+            <h3>❌ Hata</h3>
+            <p>${escapeHtml(r.hata)}</p>
+            ${renderSonucOzeti(r)}
+          </div>`;
+        sonucKutu.innerHTML += renderAiRapor(r.rapor);
+        sonucKutu.innerHTML += renderRedCozum(r.redCozum);
+        sonucKutu.innerHTML += renderRetryBilgi(r.retryBilgi);
+        sonucKutu.innerHTML += renderGerekcePdf(r.gerekcePdf || r.rapor?.gerekcePdf);
+        return;
+      }
+
+      const sonucText = String(r.sonuc || "").toUpperCase();
+      const durumClass = sonucText.includes("RED") && !sonucText.includes("ONAY")
+        ? "kirmizi"
+        : "basarili";
+
+      const durumTitle = sonucClassTitle(sonucText);
+
+      sonucKutu.innerHTML = `
+        <div class="${durumClass}">
+          <h3>${durumTitle}</h3>
+          <p><strong>Sonuç:</strong> ${escapeHtml(r.sonuc || "-")}</p>
+          <p><strong>Süre:</strong> ${r.elapsedMs != null ? `${(r.elapsedMs / 1000).toFixed(2)}s` : "-"}</p>
+          ${renderSonucOzeti(r)}
+        </div>`;
+
+      sonucKutu.innerHTML += renderAiRapor(r.rapor);
+      sonucKutu.innerHTML += renderRedCozum(r.redCozum);
+      sonucKutu.innerHTML += renderRetryBilgi(r.retryBilgi);
+      sonucKutu.innerHTML += renderGerekcePdf(r.gerekcePdf || r.rapor?.gerekcePdf);
+    });
+
+    es.onerror = () => {
+      if (es.readyState === EventSource.CLOSED) {
+        finalizeUi();
+      }
+    };
+
+    function sonucClassTitle(sonucText) {
+      if (sonucText.includes("RED") && !sonucText.includes("ONAY")) {
+        return "❌ İşlem RED";
+      }
+
+      if (sonucText.includes("ONAY")) {
+        return "✅ Tamamlandı";
+      }
+
+      return "ℹ️ İşlem Sonucu";
+    }
+  }
+</script>
+</body>
+</html>

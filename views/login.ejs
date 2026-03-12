@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Giriş — RPA Panel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .kart { background: white; border-radius: 16px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 4px 24px rgba(0,0,0,.1); }
+    h2 { color: #1a237e; margin-bottom: 24px; text-align: center; }
+    label { display: block; margin-bottom: 6px; font-size: .9rem; color: #555; font-weight: 600; }
+    input { width: 100%; padding: 11px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; margin-bottom: 16px; }
+    input:focus { outline: none; border-color: #4361ee; }
+    button { width: 100%; padding: 12px; background: #1a237e; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    button:hover { background: #283593; }
+    .hata { background: #f8d7da; color: #721c24; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <div class="kart">
+    <h2>🏥 RPA Panel Girişi</h2>
+    <% if (error) { %>
+      <div class="hata">❌ <%= error %></div>
+    <% } %>
+    <form method="POST" action="/login">
+      <label>Kullanıcı Adı</label>
+      <input type="text" name="username" placeholder="admin" required autofocus>
+      <label>Şifre</label>
+      <input type="password" name="password" placeholder="••••" required>
+      <button type="submit">Giriş Yap</button>
+    </form>
+  </div>
+</body>
+</html>

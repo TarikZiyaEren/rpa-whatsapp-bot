@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>KVKK — RPA Panel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; }
+    header {
+      background: #1a237e;
+      color: white;
+      padding: 14px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 { font-size: 1.2rem; display:flex; align-items:center; gap:10px; }
+    nav a {
+      color: #aac4ff;
+      text-decoration: none;
+      margin-left: 20px;
+      font-size: .9rem;
+    }
+    nav a:hover { color: white; }
+
+    .hospital-badge{
+      font-size:.78rem;
+      background:#e8eaf6;
+      color:#1a237e;
+      padding:4px 10px;
+      border-radius:999px;
+      font-weight:700;
+    }
+
+    .container { max-width: 900px; margin: 40px auto; padding: 0 16px; }
+
+    .kart {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      margin-bottom: 20px;
+    }
+
+    .kart h2 { color: #1a237e; margin-bottom: 16px; }
+
+    .grid4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      background: white;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+
+    .stat .sayi { font-size: 2rem; font-weight: 700; }
+    .stat .etiket { font-size: .85rem; color: #666; margin-top: 4px; }
+
+    .kirmizi .sayi { color: #e74c3c; }
+    .sari .sayi { color: #f39c12; }
+    .yesil .sayi { color: #2ecc71; }
+    .mavi .sayi { color: #1a237e; }
+
+    button {
+      padding: 11px 24px;
+      background: #1a237e;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:disabled { background: #9fa8da; }
+    button.kirmizi-btn { background: #e74c3c; }
+    button.yesil-btn { background: #27ae60; }
+
+    #log-kutu {
+      background: #0f172a;
+      color: #7dd3fc;
+      font-family: monospace;
+      font-size: .85rem;
+      padding: 16px;
+      border-radius: 8px;
+      max-height: 180px;
+      overflow-y: auto;
+      display: none;
+      margin: 16px 0;
+    }
+
+    #rapor-kutu {
+      background: #f8f9ff;
+      border: 1px solid #c5cae9;
+      border-radius: 8px;
+      padding: 20px;
+      font-family: monospace;
+      font-size: .85rem;
+      white-space: pre-wrap;
+      display: none;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th {
+      background: #f0f4ff;
+      padding: 10px;
+      text-align: left;
+      font-size: .82rem;
+    }
+    td {
+      padding: 9px 10px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .badge {
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: .78rem;
+      font-weight: 600;
+    }
+
+    .badge-yuksek { background: #fde8e8; color: #c0392b; }
+    .badge-orta   { background: #fef3cd; color: #d35400; }
+    .badge-dusuk  { background: #d4edda; color: #1e8449; }
+    .badge-bilgi  { background: #e8eaf6; color: #1a237e; }
+
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: .9rem;
+      color: #555;
+      font-weight: 600;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #ddd;
+      border-radius: 7px;
+      font-size: .95rem;
+      margin-bottom: 12px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .muted {
+      color: #667085;
+      font-size: .9rem;
+    }
+
+    @media (max-width: 760px) {
+      .grid4 { grid-template-columns: repeat(2, 1fr); }
+      .row2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>
+    🏥 RPA Provizyon Paneli
+    <% if (typeof currentHospital !== "undefined" && currentHospital) { %>
+      <span class="hospital-badge"><%= currentHospital.ad %></span>
+    <% } %>
+  </h1>
+  <nav>
+    <a href="/">🤖 Provizyon</a>
+    <a href="/red-onleme">🛡️ Red Önleme</a>
+    <a href="/dashboard">📊 Dashboard</a>
+    <a href="/monitoring">📈 Monitoring</a>
+    <a href="/credentials">🔑 Credentials</a>
+    <% if (typeof currentUser !== "undefined" && currentUser && currentUser.role === "admin") { %>
+      <a href="/admin/users">🏥 Hospitals</a>
+      <a href="/admin/audit">🔒 Audit</a>
+    <% } %>
+    <a href="/logout">Çıkış</a>
+  </nav>
+</header>
+
+<div class="container">
+
+  <%
+    const safeIstatistik = istatistik || { total: 0, yuksek: 0, orta: 0, dusuk: 0 };
+    const safeLoglar = Array.isArray(loglar) ? loglar : [];
+  %>
+
+  <div class="kart" style="margin-bottom:16px;">
+    <h2>🔐 KVKK Yönetimi</h2>
+    <p class="muted">
+      Bu ekran giriş yapan kullanıcının bağlı olduğu hastanenin KVKK kayıtlarını ve işlemlerini gösterir.
+    </p>
+  </div>
+
+  <div class="grid4">
+    <div class="stat mavi">
+      <div class="sayi"><%= safeIstatistik.total %></div>
+      <div class="etiket">Toplam Kayıt</div>
+    </div>
+    <div class="stat kirmizi">
+      <div class="sayi"><%= safeIstatistik.yuksek %></div>
+      <div class="etiket">🔴 Yüksek Risk</div>
+    </div>
+    <div class="stat sari">
+      <div class="sayi"><%= safeIstatistik.orta %></div>
+      <div class="etiket">🟡 Orta Risk</div>
+    </div>
+    <div class="stat yesil">
+      <div class="sayi"><%= safeIstatistik.dusuk %></div>
+      <div class="etiket">🟢 Düşük Risk</div>
+    </div>
+  </div>
+
+  <div class="kart">
+    <h2>🔍 KVKK Tarama</h2>
+    <p style="color:#666;font-size:.9rem;margin-bottom:16px">
+      Sistemdeki tüm hasta kayıtlarını KVKK uyumluluğu açısından tarar.
+    </p>
+    <div class="btn-row">
+      <form method="POST" action="/kvkk/tara" id="tarama-form">
+        <button type="submit" id="tara-btn">🔍 KVKK Taraması Başlat</button>
+      </form>
+    </div>
+    <div id="log-kutu"></div>
+    <div id="rapor-kutu"></div>
+  </div>
+
+  <div class="kart">
+    <h2>📝 Aydınlatma Metni</h2>
+    <div class="row2">
+      <div>
+        <label>TC Kimlik No</label>
+        <input type="text" id="ayd-tc" maxlength="11" placeholder="12345678901">
+      </div>
+      <div>
+        <label>Hasta Adı</label>
+        <input type="text" id="ayd-ad" placeholder="Ayşe Demir">
+      </div>
+    </div>
+    <button class="yesil-btn" onclick="aydinlatmaGetir()">📄 Aydınlatma Metni Oluştur</button>
+    <div id="aydinlatma-kutu" style="margin-top:16px;display:none">
+      <pre id="aydinlatma-metin" style="background:#f8f9ff;padding:16px;border-radius:8px;font-size:.85rem;white-space:pre-wrap;border:1px solid #c5cae9"></pre>
+    </div>
+  </div>
+
+  <div class="kart">
+    <h2>🗑️ Veri Silme Talebi</h2>
+    <div class="row2">
+      <div>
+        <label>TC Kimlik No</label>
+        <input type="text" id="sil-tc" maxlength="11" placeholder="12345678901">
+      </div>
+      <div>
+        <label>Hasta Adı</label>
+        <input type="text" id="sil-ad" placeholder="Ayşe Demir">
+      </div>
+    </div>
+    <label>Silme Sebebi</label>
+    <input type="text" id="sil-sebep" placeholder="Hasta talebi / Saklama süresi doldu">
+    <button class="kirmizi-btn" onclick="silmeTalebi()">🗑️ Silme Talebi Oluştur</button>
+    <div id="silme-sonuc" style="margin-top:12px"></div>
+  </div>
+
+  <div class="kart">
+    <h2>📋 KVKK Log Kayıtları</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Zaman</th>
+          <th>Tip</th>
+          <th>Açıklama</th>
+          <th>Risk</th>
+          <th>Durum</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (safeLoglar.length === 0) { %>
+          <tr>
+            <td colspan="5" style="text-align:center;color:#999;padding:20px">Henüz kayıt yok</td>
+          </tr>
+        <% } %>
+
+        <% safeLoglar.forEach(log => { %>
+        <tr>
+          <td style="font-size:.8rem;color:#666"><%= new Date(log.time).toLocaleString('tr-TR') %></td>
+          <td><code style="font-size:.8rem"><%= log.tip || "-" %></code></td>
+          <td style="font-size:.85rem"><%= log.aciklama || "-" %></td>
+          <td>
+            <span class="badge badge-<%= (String(log.risk_seviyesi || '')).toLowerCase().replace('ü','u') %>">
+              <%= log.risk_seviyesi || "-" %>
+            </span>
+          </td>
+          <td style="font-size:.8rem;color:#666"><%= log.durum || "-" %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const jobId = <%- JSON.stringify(jobId) %>;
+if (jobId) {
+  const logKutu   = document.getElementById('log-kutu');
+  const raporKutu = document.getElementById('rapor-kutu');
+  const btn = document.getElementById('tara-btn');
+  logKutu.style.display = 'block';
+  btn.disabled = true;
+  btn.textContent = '⏳ Taranıyor...';
+
+  const es = new EventSource('/api/events/' + jobId);
+  es.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    if (data.type === 'log') {
+      logKutu.innerHTML += data.line + '<br>';
+      logKutu.scrollTop = logKutu.scrollHeight;
+    }
+    if (data.type === 'done') {
+      es.close();
+      btn.disabled = false;
+      btn.textContent = '🔍 KVKK Taraması Başlat';
+      if (data.result.rapor) {
+        raporKutu.style.display = 'block';
+        raporKutu.textContent = data.result.rapor;
+      }
+      setTimeout(() => location.reload(), 2000);
+    }
+  };
+}
+
+async function aydinlatmaGetir() {
+  const tc = document.getElementById('ayd-tc').value;
+  const ad = document.getElementById('ayd-ad').value;
+  if (!tc || !ad) return alert('TC ve Ad gerekli!');
+
+  const resp = await fetch('/kvkk/aydinlatma', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tc, ad }),
+  });
+
+  const data = await resp.json();
+  document.getElementById('aydinlatma-metin').textContent = data.metin;
+  document.getElementById('aydinlatma-kutu').style.display = 'block';
+}
+
+async function silmeTalebi() {
+  const tc    = document.getElementById('sil-tc').value;
+  const ad    = document.getElementById('sil-ad').value;
+  const sebep = document.getElementById('sil-sebep').value;
+  if (!tc || !ad) return alert('TC ve Ad gerekli!');
+
+  const resp = await fetch('/kvkk/silme-talebi', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tc, ad, sebep }),
+  });
+
+  const data = await resp.json();
+  document.getElementById('silme-sonuc').innerHTML = `
+    <div style="background:#d4edda;color:#155724;padding:12px 16px;border-radius:8px;border-left:4px solid #2ecc71">
+      ✅ <strong>Talep Oluşturuldu!</strong><br>
+      Talep ID: <code>${data.id}</code><br>
+      Durum: ${data.durum}
+    </div>`;
+}
+</script>
+</body>
+</html>

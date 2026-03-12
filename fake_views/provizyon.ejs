@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Provizyon — Sigorta Portali</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #e8f4fd; padding: 40px; max-width: 500px; margin: auto; }
+    h2 { color: #0d47a1; margin-bottom: 20px; }
+    input { width: 100%; padding: 10px; margin: 6px 0 14px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
+    button { padding: 10px 20px; background: #0d47a1; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .box { margin-top: 20px; padding: 16px; border-radius: 8px; }
+    .ok { background: #e8f5e9; border: 1px solid #a5d6a7; color: #1b5e20; }
+    .err { background: #fdecea; border: 1px solid #ef9a9a; color: #b71c1c; }
+    .durum { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
+    a { display: inline-block; margin-top: 16px; color: #0d47a1; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <h2>🏦 Provizyon Sorgula</h2>
+
+  <form method="POST" action="/provizyon">
+    <input type="text" name="tc" placeholder="TC Kimlik No (11 hane)" maxlength="11" required>
+    <input type="text" name="ad" placeholder="Ad Soyad" required>
+    <input type="text" name="dogum" placeholder="Doğum Tarihi (01.01.1990)" required>
+    <input type="text" name="islem_kodu" placeholder="İşlem Kodu" value="520.010">
+    <button type="submit">Sorgula</button>
+  </form>
+
+  <% if (error) { %>
+    <div class="box err">❌ <%= error %></div>
+  <% } %>
+
+  <% if (result) { %>
+    <div class="box <%= result.status === 'ONAY' ? 'ok' : 'err' %>">
+      <div class="durum">Durum: <%= result.status %></div>
+      <p><%= result.message %></p>
+      <p><strong>TC:</strong> *******<%= result.tc.slice(-4) %></p>
+      <p><strong>Ad:</strong> <%= result.ad %></p>
+    </div>
+  <% } %>
+
+  <a href="/logout">Çıkış Yap</a>
+</body>
+</html>
+```
+
+---
+

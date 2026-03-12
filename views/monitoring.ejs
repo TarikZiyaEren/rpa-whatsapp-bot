@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RPA Monitoring</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 24px;
+      background: #f7f8fa;
+      color: #222;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hospital-badge {
+      font-size: .78rem;
+      background: #e8eaf6;
+      color: #1a237e;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    .metric {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .label {
+      color: #666;
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #fafafa;
+    }
+
+    .ok {
+      color: #0a7a32;
+      font-weight: bold;
+    }
+
+    .bad {
+      color: #b42318;
+      font-weight: bold;
+    }
+
+    .warn {
+      color: #b54708;
+      font-weight: bold;
+    }
+
+    .muted {
+      color: #666;
+    }
+
+    .topbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      border: 1px solid #ddd;
+      background: white;
+      color: #222;
+    }
+
+    .section-title {
+      margin: 24px 0 12px;
+    }
+
+    .live-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 12px;
+      font-weight: bold;
+      vertical-align: middle;
+    }
+
+    .updated-at {
+      margin: 8px 0 20px;
+      color: #666;
+      font-size: 13px;
+    }
+
+    .chart-card {
+      height: 340px;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 260px;
+    }
+
+    .list-table th,
+    .list-table td {
+      font-size: 13px;
+      padding: 10px;
+    }
+
+    .small {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .risk-high {
+      color: #b42318;
+      font-weight: 700;
+    }
+
+    .risk-mid {
+      color: #b54708;
+      font-weight: 700;
+    }
+
+    .risk-low {
+      color: #0a7a32;
+      font-weight: 700;
+    }
+
+    .wide-table-wrap {
+      overflow-x: auto;
+      background: white;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #eef2ff;
+      color: #3730a3;
+    }
+
+    .pill.good {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .pill.warn {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .pill.bad {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    RPA Monitoring Paneli
+    <span class="live-badge">LIVE</span>
+    <% if (typeof currentHospital !== "undefined" && currentHospital) { %>
+      <span class="hospital-badge"><%= currentHospital.ad %></span>
+    <% } %>
+  </h1>
+
+  <div class="topbar">
+    <a class="btn" href="/">Ana Sayfa</a>
+    <a class="btn" href="/dashboard">Dashboard</a>
+    <a class="btn" href="/history">History</a>
+    <a class="btn" href="/credentials">Credentials</a>
+    <% if (typeof currentUser !== "undefined" && currentUser && currentUser.role === "admin") { %>
+      <a class="btn" href="/admin/users">Hospitals</a>
+      <a class="btn" href="/admin/audit">Audit</a>
+    <% } %>
+  </div>
+
+  <div class="updated-at">
+    Son güncelleme: <span id="updatedAt"><%= generatedAt || new Date().toISOString() %></span>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Aktif Worker</h2>
+      <div class="metric" id="activeWorkers"><%= queue.activeWorkers %></div>
+      <div class="label">Şu anda çalışan worker sayısı</div>
+    </div>
+
+    <div class="card">
+      <h2>Dinamik Worker Limiti</h2>
+      <div class="metric" id="dynamicMaxWorkers"><%= queue.maxWorkers %></div>
+      <div class="label">
+        Min: <span id="minWorkers"><%= queue.minWorkers %></span> |
+        Tavan: <span id="staticMaxWorkers"><%= queue.staticMaxWorkers %></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Kuyruktaki Job</h2>
+      <div class="metric" id="queuedJobs"><%= queue.queued %></div>
+      <div class="label">Bekleyen iş sayısı</div>
+    </div>
+
+    <div class="card">
+      <h2>Dead Job</h2>
+      <div class="metric" id="deadJobs"><%= queue.deadJobs || 0 %></div>
+      <div class="label">Kalıcı hataya düşen işler</div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Tahmin ve Öğrenme Özeti</h2>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Toplam Örnek</h2>
+      <div class="metric" id="learningTotal"><%= learning.total %></div>
+      <div class="label">Kaydedilmiş öğrenme verisi</div>
+    </div>
+
+    <div class="card">
+      <h2>Onay</h2>
+      <div class="metric" id="learningOnay"><%= learning.onay %></div>
+      <div class="label">Başarılı sonuç sayısı</div>
+    </div>
+
+    <div class="card">
+      <h2>Red</h2>
+      <div class="metric" id="learningRed"><%= learning.red %></div>
+      <div class="label">Red ile sonuçlanan işlem sayısı</div>
+    </div>
+
+    <div class="card">
+      <h2>Retry Başarı</h2>
+      <div class="metric" id="learningRetry"><%= learning.retrySuccess %></div>
+      <div class="label">Retry ile başarıya dönen işlem</div>
+    </div>
+
+    <div class="card">
+      <h2>Ortalama Risk</h2>
+      <div class="metric" id="learningAvgRisk"><%= learning.avgRisk %></div>
+      <div class="label">Tahmin ortalama risk skoru</div>
+    </div>
+
+    <div class="card">
+      <h2>Red Oranı</h2>
+      <div class="metric" id="learningRedRate"><%= ((learning.redRate || 0) * 100).toFixed(0) %>%</div>
+      <div class="label">Toplam kayıtlar içinde red oranı</div>
+    </div>
+
+    <div class="card">
+      <h2>Calibration Error</h2>
+      <div class="metric" id="learningCalibration"><%= learning.calibrationError || 0 %></div>
+      <div class="label">Tahminler ile gerçek sonuç arasındaki fark</div>
+    </div>
+
+    <div class="card">
+      <h2>AI Bloke</h2>
+      <div class="metric" id="aiBlockCount"><%= summary?.aiBloke || 0 %></div>
+      <div class="label">AI tarafından durdurulan işlem</div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Operasyon Özeti</h2>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Ortalama Süre</h2>
+      <div class="metric" id="avgElapsedSec"><%= summary?.avgElapsedSec || 0 %> sn</div>
+      <div class="label">İşlem başına ortalama bot süresi</div>
+    </div>
+
+    <div class="card">
+      <h2>Retry Kullanımı</h2>
+      <div class="metric" id="retryCount"><%= summary?.retryCount || 0 %></div>
+      <div class="label">Otomatik retry tetiklenen işlem</div>
+    </div>
+
+    <div class="card">
+      <h2>Retry Başarı Oranı</h2>
+      <div class="metric" id="retrySuccessRate"><%= Math.round((summary?.retrySuccessRate || 0) * 100) %>%</div>
+      <div class="label">Retry çalıştıktan sonra başarılı olan oran</div>
+    </div>
+
+    <div class="card">
+      <h2>Ortalama AI Risk</h2>
+      <div class="metric" id="avgAiRisk"><%= summary?.avgAiRisk || 0 %></div>
+      <div class="label">History kayıtlarının ortalama risk skoru</div>
+    </div>
+  </div>
+
+  <h2 class="section-title">AI Risk Analizi</h2>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>En Riskli İşlemler</h2>
+      <div id="topRiskyProceduresWrap"></div>
+    </div>
+
+    <div class="card">
+      <h2>En Riskli Provider'lar</h2>
+      <div id="topRiskyProvidersWrap"></div>
+    </div>
+
+    <div class="card">
+      <h2>En Sık Eksik Belgeler</h2>
+      <div id="topMissingDocumentsWrap"></div>
+    </div>
+
+    <div class="card">
+      <h2>En Sık Red Nedenleri</h2>
+      <div id="topRedReasonsWrap"></div>
+    </div>
+
+    <div class="card">
+      <h2>Yaş Grubu Riski</h2>
+      <div id="ageDistributionWrap"></div>
+    </div>
+
+    <div class="card">
+      <h2>Keyword Patternleri</h2>
+      <div id="keywordPatternsWrap"></div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Tahmin Özeti</h2>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>En Riskli Tahminler</h2>
+      <div id="topRedPredictionsWrap"></div>
+    </div>
+
+    <div class="card">
+      <h2>Model Durumu</h2>
+      <div class="grid-3" style="margin-bottom:0;">
+        <div>
+          <div class="small">Ortalama Risk</div>
+          <div class="metric" style="font-size:22px;"><%= learning.avgRisk || 0 %></div>
+        </div>
+        <div>
+          <div class="small">Red Oranı</div>
+          <div class="metric" style="font-size:22px;"><%= ((learning.redRate || 0) * 100).toFixed(0) %>%</div>
+        </div>
+        <div>
+          <div class="small">Calibration</div>
+          <div class="metric" style="font-size:22px;"><%= learning.calibrationError || 0 %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Grafikler</h2>
+
+  <div class="grid">
+    <div class="card chart-card">
+      <h2>Queue Durumu</h2>
+      <div class="chart-wrap">
+        <canvas id="queueChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <h2>AI Learning Dağılımı</h2>
+      <div class="chart-wrap">
+        <canvas id="learningChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <h2>Sonuç Dağılımı</h2>
+      <div class="chart-wrap">
+        <canvas id="outcomesChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <h2>En Riskli İşlemler</h2>
+      <div class="chart-wrap">
+        <canvas id="topRiskyProceduresChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <h2>Eksik Belgeler</h2>
+      <div class="chart-wrap">
+        <canvas id="missingDocumentsChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <h2>Provider Riski</h2>
+      <div class="chart-wrap">
+        <canvas id="providersChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <h2>Yaş Grubu Riski</h2>
+      <div class="chart-wrap">
+        <canvas id="ageDistributionChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <h2>Tahmin Confidence</h2>
+      <div class="chart-wrap">
+        <canvas id="predictionConfidenceChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Son İşlemler</h2>
+
+  <div class="wide-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Zaman</th>
+          <th>Provider</th>
+          <th>Hasta</th>
+          <th>TC</th>
+          <th>İşlem</th>
+          <th>AI Risk</th>
+          <th>Red Nedeni</th>
+          <th>Sonuç</th>
+          <th>Hata</th>
+          <th>Süre</th>
+        </tr>
+      </thead>
+      <tbody id="recentTableBody"></tbody>
+    </table>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const initialInsights = <%- JSON.stringify(insights || {}) %>;
+    const initialSummary = <%- JSON.stringify(summary || {}) %>;
+
+    const initialCharts = {
+      queue: <%- JSON.stringify(charts?.queue || { labels: [], values: [] }) %>,
+      learning: <%- JSON.stringify(charts?.learning || { labels: [], values: [] }) %>,
+      outcomes: <%- JSON.stringify(charts?.outcomes || { labels: [], values: [] }) %>,
+      topRiskyProcedures: <%- JSON.stringify(charts?.topRiskyProcedures || { labels: [], values: [] }) %>,
+      missingDocuments: <%- JSON.stringify(charts?.missingDocuments || { labels: [], values: [] }) %>,
+      providers: <%- JSON.stringify(charts?.providers || { labels: [], values: [] }) %>,
+      ageDistribution: <%- JSON.stringify(charts?.ageDistribution || { labels: [], values: [] }) %>,
+      predictionConfidence: <%- JSON.stringify(charts?.predictionConfidence || { labels: [], values: [] }) %>,
+    };
+
+    const initialRecent = <%- JSON.stringify(recent || []) %>;
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function sonucClass(sonuc) {
+      const text = String(sonuc || "").toUpperCase();
+      if (text.includes("ONAY")) return "ok";
+      if (text.includes("AI BLOKE")) return "warn";
+      if (text.includes("RED")) return "bad";
+      return "";
+    }
+
+    function riskClass(aiRisk) {
+      const value = Number(aiRisk || 0);
+      if (value >= 0.7) return "risk-high";
+      if (value >= 0.4) return "risk-mid";
+      return "risk-low";
+    }
+
+    function formatPercent(value) {
+      const n = Number(value || 0);
+      return `${Math.round(n * 100)}%`;
+    }
+
+    function renderRecentRows(recent) {
+      const tbody = document.getElementById("recentTableBody");
+
+      if (!recent || recent.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="muted">Henüz veri yok.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = recent.map((item) => `
+        <tr>
+          <td>${escapeHtml(item.createdAt || item.time || "-")}</td>
+          <td>${escapeHtml(item.provider || "-")}</td>
+          <td>${escapeHtml(item.ad || "-")}</td>
+          <td>${escapeHtml(item.tc || "-")}</td>
+          <td>
+            <div><strong>${escapeHtml(item.islem_kodu || "-")}</strong></div>
+            <div class="small">${escapeHtml(item.islem_adi || "-")}</div>
+          </td>
+          <td><span class="${riskClass(item.ai_risk)}">${item.ai_risk != null ? escapeHtml(formatPercent(item.ai_risk)) : "-"}</span></td>
+          <td>${escapeHtml(item.red_nedeni || "-")}</td>
+          <td class="${sonucClass(item.sonuc)}">${escapeHtml(item.sonuc || "-")}</td>
+          <td>${escapeHtml(item.hata || "-")}</td>
+          <td>${escapeHtml(item.elapsedMs || 0)} ms</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderSimpleTable(targetId, columns, rows, emptyText) {
+      const wrap = document.getElementById(targetId);
+
+      if (!rows || rows.length === 0) {
+        wrap.innerHTML = `<div class="muted">${escapeHtml(emptyText)}</div>`;
+        return;
+      }
+
+      const head = columns.map((c) => `<th>${escapeHtml(c.label)}</th>`).join("");
+      const body = rows.map((row) => `
+        <tr>
+          ${columns.map((c) => `<td>${c.render ? c.render(row[c.key], row) : escapeHtml(row[c.key] ?? "-")}</td>`).join("")}
+        </tr>
+      `).join("");
+
+      wrap.innerHTML = `
+        <table class="list-table">
+          <thead><tr>${head}</tr></thead>
+          <tbody>${body}</tbody>
+        </table>
+      `;
+    }
+
+    function refreshSummary(summary, learning) {
+      document.getElementById("avgElapsedSec").textContent = `${summary?.avgElapsedSec || 0} sn`;
+      document.getElementById("retryCount").textContent = summary?.retryCount || 0;
+      document.getElementById("retrySuccessRate").textContent = `${Math.round(Number(summary?.retrySuccessRate || 0) * 100)}%`;
+      document.getElementById("avgAiRisk").textContent = summary?.avgAiRisk || 0;
+      document.getElementById("learningCalibration").textContent = learning?.calibrationError || 0;
+      document.getElementById("aiBlockCount").textContent = summary?.aiBloke || 0;
+      document.getElementById("deadJobs").textContent = summary?.deadJobs || document.getElementById("deadJobs").textContent;
+    }
+
+    const queueChart = new Chart(document.getElementById("queueChart"), {
+      type: "bar",
+      data: { labels: initialCharts.queue.labels, datasets: [{ label: "Worker Durumu", data: initialCharts.queue.values }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    const learningChart = new Chart(document.getElementById("learningChart"), {
+      type: "doughnut",
+      data: { labels: initialCharts.learning.labels, datasets: [{ data: initialCharts.learning.values }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    const outcomesChart = new Chart(document.getElementById("outcomesChart"), {
+      type: "pie",
+      data: { labels: initialCharts.outcomes.labels, datasets: [{ data: initialCharts.outcomes.values }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    const topRiskyProceduresChart = new Chart(document.getElementById("topRiskyProceduresChart"), {
+      type: "bar",
+      data: { labels: initialCharts.topRiskyProcedures.labels, datasets: [{ label: "Red Oranı", data: initialCharts.topRiskyProcedures.values }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    const missingDocumentsChart = new Chart(document.getElementById("missingDocumentsChart"), {
+      type: "bar",
+      data: { labels: initialCharts.missingDocuments.labels, datasets: [{ label: "Adet", data: initialCharts.missingDocuments.values }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    const providersChart = new Chart(document.getElementById("providersChart"), {
+      type: "bar",
+      data: { labels: initialCharts.providers.labels, datasets: [{ label: "Red Oranı", data: initialCharts.providers.values }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    const ageDistributionChart = new Chart(document.getElementById("ageDistributionChart"), {
+      type: "bar",
+      data: { labels: initialCharts.ageDistribution.labels, datasets: [{ label: "Red Oranı", data: initialCharts.ageDistribution.values }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    const predictionConfidenceChart = new Chart(document.getElementById("predictionConfidenceChart"), {
+      type: "bar",
+      data: { labels: initialCharts.predictionConfidence.labels, datasets: [{ label: "Confidence", data: initialCharts.predictionConfidence.values }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    function updateChart(chart, labels, values) {
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = values;
+      chart.update();
+    }
+
+    function refreshInsightTables(insights) {
+      renderSimpleTable(
+        "topRiskyProceduresWrap",
+        [
+          { key: "kod", label: "İşlem Kodu" },
+          { key: "red", label: "Red", render: (v) => `<span class="bad">${escapeHtml(v ?? 0)}</span>` },
+          { key: "toplam", label: "Toplam" },
+          { key: "redOrani", label: "Red Oranı", render: (v) => `<span class="warn">${escapeHtml(formatPercent(v))}</span>` },
+        ],
+        (insights?.topRiskyProcedures || []).slice(0, 5),
+        "Henüz yeterli veri yok."
+      );
+
+      renderSimpleTable(
+        "topRiskyProvidersWrap",
+        [
+          { key: "provider", label: "Provider" },
+          { key: "red", label: "Red", render: (v) => `<span class="bad">${escapeHtml(v ?? 0)}</span>` },
+          { key: "toplam", label: "Toplam" },
+          { key: "redOrani", label: "Red Oranı", render: (v) => `<span class="warn">${escapeHtml(formatPercent(v))}</span>` },
+        ],
+        (insights?.topRiskyProviders || []).slice(0, 5),
+        "Henüz yeterli veri yok."
+      );
+
+      renderSimpleTable(
+        "topMissingDocumentsWrap",
+        [
+          { key: "belge", label: "Belge" },
+          { key: "adet", label: "Adet", render: (v) => `<span class="warn">${escapeHtml(v ?? 0)}</span>` },
+        ],
+        (insights?.topMissingDocuments || []).slice(0, 5),
+        "Henüz eksik belge verisi yok."
+      );
+
+      renderSimpleTable(
+        "topRedReasonsWrap",
+        [
+          { key: "neden", label: "Red Nedeni" },
+          { key: "adet", label: "Adet", render: (v) => `<span class="bad">${escapeHtml(v ?? 0)}</span>` },
+        ],
+        (insights?.topRedReasons || []).slice(0, 5),
+        "Henüz red nedeni verisi yok."
+      );
+
+      renderSimpleTable(
+        "ageDistributionWrap",
+        [
+          { key: "grup", label: "Yaş Grubu" },
+          { key: "red", label: "Red" },
+          { key: "toplam", label: "Toplam" },
+          { key: "redOrani", label: "Red Oranı", render: (v) => `<span class="warn">${escapeHtml(formatPercent(v))}</span>` },
+        ],
+        (insights?.ageDistribution || []).slice(0, 5),
+        "Henüz yaş grubu verisi yok."
+      );
+
+      renderSimpleTable(
+        "keywordPatternsWrap",
+        [
+          { key: "islem_kodu", label: "İşlem" },
+          { key: "etiket", label: "Etiket" },
+          { key: "yas_grubu", label: "Yaş" },
+          { key: "red", label: "Red" },
+          { key: "toplam", label: "Toplam" },
+          { key: "redOrani", label: "Red Oranı", render: (v) => `<span class="warn">${escapeHtml(formatPercent(v))}</span>` },
+        ],
+        (insights?.keywordPatterns || []).slice(0, 5),
+        "Henüz keyword pattern verisi yok."
+      );
+
+      renderSimpleTable(
+        "topRedPredictionsWrap",
+        [
+          { key: "islem_kodu", label: "İşlem" },
+          { key: "provider", label: "Provider" },
+          { key: "risk", label: "Risk", render: (v) => `<span class="${Number(v || 0) >= 0.7 ? "risk-high" : Number(v || 0) >= 0.4 ? "risk-mid" : "risk-low"}">${escapeHtml(formatPercent(v))}</span>` },
+          { key: "seviye", label: "Seviye", render: (v) => `<span class="pill ${String(v || "").includes("YÜKSEK") ? "bad" : String(v || "").includes("ORTA") ? "warn" : "good"}">${escapeHtml(v || "-")}</span>` },
+          { key: "confidence", label: "Confidence", render: (v) => `<span class="pill">${escapeHtml(formatPercent(v))}</span>` },
+        ],
+        (insights?.topRedPredictions || []).slice(0, 10),
+        "Henüz tahmin verisi yok."
+      );
+    }
+
+    async function refreshMonitoring() {
+      try {
+        const res = await fetch("/api/monitoring", {
+          headers: { "Accept": "application/json" }
+        });
+
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.ok) return;
+
+        document.getElementById("activeWorkers").textContent = data.queue.activeWorkers;
+        document.getElementById("queuedJobs").textContent = data.queue.queued;
+        document.getElementById("dynamicMaxWorkers").textContent = data.queue.maxWorkers;
+        document.getElementById("minWorkers").textContent = data.queue.minWorkers;
+        document.getElementById("staticMaxWorkers").textContent = data.queue.staticMaxWorkers;
+        document.getElementById("deadJobs").textContent = data.queue.deadJobs || 0;
+
+        document.getElementById("learningTotal").textContent = data.learning.total;
+        document.getElementById("learningOnay").textContent = data.learning.onay;
+        document.getElementById("learningRed").textContent = data.learning.red;
+        document.getElementById("learningRetry").textContent = data.learning.retrySuccess;
+        document.getElementById("learningAvgRisk").textContent = data.learning.avgRisk;
+        document.getElementById("learningRedRate").textContent = formatPercent(data.learning.redRate || 0);
+
+        document.getElementById("updatedAt").textContent = data.generatedAt || new Date().toISOString();
+
+        refreshSummary(data.summary || {}, data.learning || {});
+        renderRecentRows(data.recent || []);
+        refreshInsightTables(data.insights || {});
+
+        updateChart(queueChart, data.charts.queue.labels, data.charts.queue.values);
+        updateChart(learningChart, data.charts.learning.labels, data.charts.learning.values);
+        updateChart(outcomesChart, data.charts.outcomes.labels, data.charts.outcomes.values);
+        updateChart(topRiskyProceduresChart, data.charts.topRiskyProcedures.labels, data.charts.topRiskyProcedures.values);
+        updateChart(missingDocumentsChart, data.charts.missingDocuments.labels, data.charts.missingDocuments.values);
+        updateChart(providersChart, data.charts.providers.labels, data.charts.providers.values);
+        updateChart(ageDistributionChart, data.charts.ageDistribution.labels, data.charts.ageDistribution.values);
+        updateChart(predictionConfidenceChart, data.charts.predictionConfidence.labels, data.charts.predictionConfidence.values);
+      } catch (err) {
+        console.error("Monitoring refresh hatasi:", err);
+      }
+    }
+
+    renderRecentRows(initialRecent);
+    refreshInsightTables(initialInsights);
+    refreshSummary(initialSummary, <%- JSON.stringify(learning || {}) %>);
+    setInterval(refreshMonitoring, 2000);
+  </script>
+</body>
+</html>

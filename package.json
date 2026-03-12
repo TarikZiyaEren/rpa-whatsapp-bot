@@ -1,0 +1,35 @@
+{
+  "name": "rpa_system",
+  "version": "1.0.0",
+  "description": "AI destekli sağlık provizyon otomasyonu",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "concurrently \"node fake_portal.js\" \"node fake_fhir.js\" \"node server.js\"",
+    "start": "node server.js",
+    "portal": "node fake_portal.js",
+    "fhir": "node fake_fhir.js"
+  },
+  "dependencies": {
+    "axios": "^1.13.6",
+    "bullmq": "^5.70.4",
+    "dotenv": "^17.3.1",
+    "ejs": "^3.1.10",
+    "express": "^4.22.1",
+    "express-rate-limit": "^8.3.0",
+    "express-session": "^1.19.0",
+    "form-data": "^4.0.5",
+    "ioredis": "^5.10.0",
+    "pdf-parse": "^2.4.5",
+    "pdfkit": "^0.17.2",
+    "puppeteer": "^24.37.5",
+    "redis-server": "^1.2.2",
+    "sql.js": "^1.14.0",
+    "tesseract.js": "^7.0.0",
+    "twilio": "^5.12.2"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "playwright": "^1.58.2"
+  }
+}

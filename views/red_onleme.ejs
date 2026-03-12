@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Red Önleme — RPA Panel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; }
+    header { background: #1a237e; color: white; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+    nav a { color: #aac4ff; text-decoration: none; margin-left: 20px; font-size: .9rem; }
+    nav a:hover { color: white; }
+
+    .hospital-badge {
+      font-size: .78rem;
+      background: #e8eaf6;
+      color: #1a237e;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .container { max-width: 720px; margin: 40px auto; padding: 0 16px; }
+    .kart { background: white; border-radius: 12px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,.08); margin-bottom: 20px; }
+    .kart h2 { color: #1a237e; margin-bottom: 20px; }
+    label { display: block; margin-bottom: 5px; font-size: .9rem; color: #555; font-weight: 600; }
+    input, textarea { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; margin-bottom: 14px; font-family: inherit; }
+    textarea { min-height: 100px; resize: vertical; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    button { width: 100%; padding: 12px; background: #1a237e; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    button:disabled { background: #9fa8da; }
+    #log-kutu { background: #0f172a; color: #7dd3fc; font-family: monospace; font-size: .85rem; padding: 16px; border-radius: 8px; max-height: 200px; overflow-y: auto; display: none; margin-bottom: 16px; }
+    .risk-dusuk  { background: #d4edda; border-left: 4px solid #2ecc71; color: #155724; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; }
+    .risk-orta   { background: #fff3cd; border-left: 4px solid #f39c12; color: #856404; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; }
+    .risk-yuksek { background: #f8d7da; border-left: 4px solid #e74c3c; color: #721c24; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; }
+    .risk-bar-wrap { background: #eee; border-radius: 8px; height: 12px; margin: 10px 0; }
+    .risk-bar { height: 12px; border-radius: 8px; transition: width .5s; }
+    .gerekce-kutu { background: #f8f9ff; border: 1px solid #c5cae9; border-radius: 8px; padding: 16px; margin-top: 12px; font-size: .95rem; line-height: 1.6; white-space: pre-wrap; }
+    ul { padding-left: 20px; margin-top: 8px; }
+    li { margin-bottom: 4px; }
+    h3 { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>
+    🏥 RPA Provizyon Paneli
+    <% if (typeof currentHospital !== "undefined" && currentHospital) { %>
+      <span class="hospital-badge"><%= currentHospital.ad %></span>
+    <% } %>
+  </h1>
+  <nav>
+    <a href="/">🤖 Provizyon</a>
+    <a href="/dashboard">📊 Dashboard</a>
+    <a href="/history">📋 Geçmiş</a>
+    <a href="/monitoring">📈 Monitoring</a>
+    <a href="/credentials">🔑 Credentials</a>
+    <% if (typeof currentUser !== "undefined" && currentUser && currentUser.role === "admin") { %>
+      <a href="/admin/users">🏥 Hospitals</a>
+      <a href="/admin/audit">🔒 Audit</a>
+    <% } %>
+    <a href="/logout">Çıkış</a>
+  </nav>
+</header>
+
+<div class="container">
+  <div class="kart">
+    <h2>🛡️ Red Önleme Analizi</h2>
+    <form method="POST" action="/red-onleme" id="form">
+      <div class="row2">
+        <div>
+          <label>TC Kimlik No</label>
+          <input type="text" name="tc" maxlength="11" placeholder="12345678901" required>
+        </div>
+        <div>
+          <label>Hasta Adı Soyadı</label>
+          <input type="text" name="ad" placeholder="Ayşe Demir" required>
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Doğum Tarihi</label>
+          <input type="text" name="dogum" placeholder="01.01.1990" required>
+        </div>
+        <div>
+          <label>İşlem Kodu (SUT)</label>
+          <input type="text" name="islem_kodu" placeholder="520.010" required>
+        </div>
+      </div>
+      <label>İşlem Adı</label>
+      <input type="text" name="islem_adi" placeholder="Dahiliye Muayenesi" required>
+      <label>Doktor Notu (FHIR yoksa manuel girin)</label>
+      <textarea name="doktor_notu" placeholder="Hasta başvuru şikayeti, muayene bulguları..."></textarea>
+      <button type="submit" id="btn">🔍 Red Riskini Analiz Et</button>
+    </form>
+  </div>
+
+  <div id="log-kutu"></div>
+  <div id="sonuc-kutu"></div>
+</div>
+
+<script>
+const jobId = <%- JSON.stringify(jobId) %>;
+if (jobId) {
+  const logKutu   = document.getElementById('log-kutu');
+  const sonucKutu = document.getElementById('sonuc-kutu');
+  const btn = document.getElementById('btn');
+  logKutu.style.display = 'block';
+  btn.disabled = true;
+  btn.textContent = '⏳ Analiz ediliyor...';
+
+  const es = new EventSource('/api/events/' + jobId);
+  es.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    if (data.type === 'log') {
+      logKutu.innerHTML += data.line + '<br>';
+      logKutu.scrollTop = logKutu.scrollHeight;
+    }
+    if (data.type === 'done') {
+      es.close();
+      btn.disabled = false;
+      btn.textContent = '🔍 Red Riskini Analiz Et';
+
+      const r = data.result;
+      if (r.hata) {
+        sonucKutu.innerHTML = `<div class="risk-yuksek"><h3>❌ Hata</h3><p>${r.hata}</p></div>`;
+        return;
+      }
+
+      const rapor = r.rapor;
+      const renkClass = rapor.seviye === 'DÜŞÜK' ? 'risk-dusuk'
+                      : rapor.seviye === 'ORTA'   ? 'risk-orta'
+                      : 'risk-yuksek';
+      const emoji = rapor.seviye === 'DÜŞÜK' ? '✅' : rapor.seviye === 'ORTA' ? '⚠️' : '🚨';
+      const barRenk = rapor.seviye === 'DÜŞÜK' ? '#2ecc71' : rapor.seviye === 'ORTA' ? '#f39c12' : '#e74c3c';
+
+      let html = `
+        <div class="${renkClass}">
+          <h3>${emoji} Red Riski: ${rapor.seviye} (${(rapor.finalRisk * 100).toFixed(0)}%)</h3>
+          <div class="risk-bar-wrap">
+            <div class="risk-bar" style="width:${rapor.finalRisk*100}%;background:${barRenk}"></div>
+          </div>
+          <p><strong>Kural Skoru:</strong> ${(rapor.kuralSkoru*100).toFixed(0)}%
+          ${rapor.aiSkoru !== null ? `| <strong>AI Skoru:</strong> ${(rapor.aiSkoru*100).toFixed(0)}%` : ''}</p>
+        </div>`;
+
+      if (rapor.uyarilar?.length) {
+        html += `<div class="kart"><h3>⚠️ Uyarılar</h3><ul>
+          ${rapor.uyarilar.map(u => `<li>${u}</li>`).join('')}
+        </ul></div>`;
+      }
+
+      if (rapor.eksikBelgeler?.length) {
+        html += `<div class="kart"><h3>📎 Eksik Belgeler</h3><ul>
+          ${rapor.eksikBelgeler.map(b => `<li>${b}</li>`).join('')}
+        </ul></div>`;
+      }
+
+      if (rapor.oneri) {
+        html += `<div class="kart"><h3>💡 Öneri</h3><p>${rapor.oneri}</p></div>`;
+      }
+
+      if (rapor.gerekce) {
+        html += `<div class="kart">
+          <h3>📝 Otomatik Gerekçe Metni</h3>
+          <div class="gerekce-kutu">${rapor.gerekce.gerekceMetni}</div>
+          ${rapor.gerekce.anaArgumanlar?.length ? `
+            <h3 style="margin-top:12px">Ana Argümanlar</h3>
+            <ul>${rapor.gerekce.anaArgumanlar.map(a => `<li>${a}</li>`).join('')}</ul>
+          ` : ''}
+        </div>`;
+      }
+
+      sonucKutu.innerHTML = html;
+    }
+  };
+}
+</script>
+</body>
+</html>

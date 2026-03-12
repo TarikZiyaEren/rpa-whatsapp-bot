@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Geçmiş — RPA Panel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; color: #0f172a; }
+    header { background: #1a237e; color: white; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+    nav a { color: #aac4ff; text-decoration: none; margin-left: 20px; font-size: .9rem; }
+    nav a:hover { color: white; }
+
+    .hospital-badge {
+      font-size: .78rem;
+      background: #e8eaf6;
+      color: #1a237e;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .container { max-width: 1280px; margin: 32px auto; padding: 0 16px; }
+    .kart { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,.08); margin-bottom: 20px; }
+    h2 { color: #1a237e; margin-bottom: 18px; font-size: 1.1rem; }
+
+    /* ── Filtre Bar ── */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+      margin-bottom: 20px;
+    }
+    .filter-bar label { display: block; font-size: .8rem; color: #475569; margin-bottom: 4px; font-weight: 600; }
+    .filter-bar input, .filter-bar select {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font: inherit;
+      font-size: .88rem;
+      min-width: 140px;
+    }
+    .filter-bar button {
+      padding: 9px 18px;
+      border: none;
+      border-radius: 8px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: .88rem;
+    }
+    .btn-filtre { background: #1d4ed8; color: white; }
+    .btn-filtre:hover { background: #1e40af; }
+    .btn-temizle { background: #f1f5f9; color: #475569; }
+    .btn-export { background: #059669; color: white; }
+    .btn-export:hover { background: #047857; }
+
+    /* ── KPI ── */
+    .history-kpi {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .history-kpi-item {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+    .history-kpi-item .val { font-size: 1.4rem; font-weight: 800; color: #1a237e; }
+    .history-kpi-item .lbl { font-size: .78rem; color: #64748b; margin-top: 2px; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th { background: #f0f4ff; padding: 10px 12px; text-align: left; color: #555; font-size: .82rem; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: #fafbff; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge.onay { background: #dcfce7; color: #166534; }
+    .badge.red { background: #fee2e2; color: #991b1b; }
+    .badge.ai { background: #fef3c7; color: #92400e; }
+    .badge.hata { background: #fee2e2; color: #991b1b; }
+
+    .risk-low { color: #16a34a; font-weight: 700; }
+    .risk-mid { color: #d97706; font-weight: 700; }
+    .risk-high { color: #dc2626; font-weight: 700; }
+
+    .muted { color: #64748b; font-size: .85rem; }
+    .empty { color: #888; text-align: center; padding: 30px; }
+
+    /* ── Detay Panel ── */
+    .detail-panel {
+      margin-top: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .detail-item strong { display: block; font-size: .78rem; color: #475569; margin-bottom: 2px; }
+    .detail-item span { font-size: .88rem; color: #0f172a; }
+
+    .timeline {
+      margin-top: 12px;
+      padding-left: 20px;
+      border-left: 2px solid #c7d2fe;
+    }
+    .timeline-item {
+      position: relative;
+      padding: 4px 0 10px 12px;
+      font-size: .82rem;
+      color: #334155;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -26px;
+      top: 8px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4361ee;
+    }
+
+    .pdf-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: .82rem;
+      font-weight: 600;
+    }
+    .pdf-link:hover { background: #dbeafe; }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 20px;
+      font-size: .9rem;
+    }
+    .pagination button {
+      padding: 6px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font: inherit;
+    }
+    .pagination button:disabled { opacity: .4; cursor: default; }
+    .pagination button.active { background: #1d4ed8; color: white; border-color: #1d4ed8; }
+    .pagination .info { color: #64748b; font-size: .85rem; }
+
+    details summary { cursor: pointer; font-weight: 600; color: #1d4ed8; font-size: .85rem; }
+    details summary:hover { color: #1e40af; }
+
+    @media (max-width: 900px) {
+      .filter-bar { flex-direction: column; }
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>
+    🏥 RPA Provizyon Paneli
+    <% if (typeof currentHospital !== "undefined" && currentHospital) { %>
+      <span class="hospital-badge"><%= currentHospital.ad %></span>
+    <% } %>
+  </h1>
+  <nav>
+    <% const role = String(currentUser?.role || ""); %>
+    <% const isAdmin = role === "admin" || String(currentUser?.username || "").toLowerCase() === "admin"; %>
+
+    <% if (role === "operator" || isAdmin) { %>
+      <a href="/">🤖 Bot</a>
+    <% } %>
+
+    <a href="/dashboard">📊 Dashboard</a>
+
+    <% if (role === "operator" || isAdmin) { %>
+      <a href="/credentials">🔑 Credentials</a>
+    <% } %>
+
+    <a href="/monitoring">📈 Monitoring</a>
+
+    <% if (isAdmin) { %>
+      <a href="/admin/users">🏥 Hospitals</a>
+      <a href="/admin/audit">🔒 Audit</a>
+    <% } %>
+
+    <a href="/logout">Çıkış</a>
+  </nav>
+</header>
+
+<div class="container">
+  <% const safeItems = Array.isArray(items) ? items : []; %>
+
+  <!-- KPI Özeti -->
+  <%
+    const toplam = safeItems.length;
+    const onaylar = safeItems.filter(i => String(i.sonuc||"").includes("ONAY")).length;
+    const redler = safeItems.filter(i => String(i.sonuc||"").toUpperCase().includes("RED") && !String(i.sonuc||"").includes("ONAY")).length;
+    const aiBloke = safeItems.filter(i => String(i.sonuc||"").includes("AI BLOKE")).length;
+    const ortSure = toplam > 0 ? (safeItems.reduce((a,b) => a + Number(b.elapsedMs||0), 0) / toplam / 1000).toFixed(1) : "0";
+  %>
+  <div class="history-kpi">
+    <div class="history-kpi-item"><div class="val"><%= toplam %></div><div class="lbl">Toplam</div></div>
+    <div class="history-kpi-item"><div class="val" style="color:#16a34a"><%= onaylar %></div><div class="lbl">Onay</div></div>
+    <div class="history-kpi-item"><div class="val" style="color:#dc2626"><%= redler %></div><div class="lbl">Red</div></div>
+    <div class="history-kpi-item"><div class="val" style="color:#d97706"><%= aiBloke %></div><div class="lbl">AI Bloke</div></div>
+    <div class="history-kpi-item"><div class="val"><%= ortSure %>s</div><div class="lbl">Ort. Süre</div></div>
+  </div>
+
+  <div class="kart">
+    <h2>📋 İşlem Geçmişi</h2>
+
+    <!-- Filtre Bar -->
+    <div class="filter-bar">
+      <div>
+        <label for="f-tc">TC Arama</label>
+        <input type="text" id="f-tc" placeholder="Son 4 hane..." maxlength="11">
+      </div>
+      <div>
+        <label for="f-sonuc">Sonuç</label>
+        <select id="f-sonuc">
+          <option value="">Hepsi</option>
+          <option value="ONAY">Onay</option>
+          <option value="RED">Red</option>
+          <option value="AI BLOKE">AI Bloke</option>
+          <option value="HATA">Hata</option>
+        </select>
+      </div>
+      <div>
+        <label for="f-provider">Provider</label>
+        <select id="f-provider">
+          <option value="">Hepsi</option>
+          <% const providers = [...new Set(safeItems.map(i => i.provider || i.kaynak).filter(Boolean))]; %>
+          <% providers.forEach(p => { %>
+            <option value="<%= p %>"><%= p %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div>
+        <label for="f-tarih">Tarih</label>
+        <input type="date" id="f-tarih">
+      </div>
+      <button class="btn-filtre" onclick="filtrele()">🔍 Filtrele</button>
+      <button class="btn-temizle" onclick="temizle()">✕ Temizle</button>
+      <button class="btn-export" onclick="exportCSV()">📥 CSV İndir</button>
+    </div>
+
+    <% if (safeItems.length === 0) { %>
+      <div class="empty">Henüz kayıt yok.</div>
+    <% } else { %>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Zaman</th>
+              <th>TC</th>
+              <th>Hasta</th>
+              <th>İşlem</th>
+              <th>Provider</th>
+              <th>Sonuç</th>
+              <th>AI Risk</th>
+              <th>Süre</th>
+              <th>Detay</th>
+            </tr>
+          </thead>
+          <tbody id="history-body">
+            <% safeItems.forEach(function(item, index) {
+                 const createdAt = item.createdAt || item.time || null;
+                 const tc = item.tc || item.tcKimlikNo || "";
+                 const ad = item.ad || item.hastaAdi || "-";
+                 const sonucText = String(item.sonuc || "");
+                 const isAi = sonucText.includes("AI BLOKE");
+                 const isOnay = sonucText.includes("ONAY");
+                 const isHata = !!item.hata;
+                 const riskVal = item.ai_risk != null ? Math.round(Number(item.ai_risk) * 100) : null;
+                 const riskClass = riskVal != null ? (riskVal >= 70 ? 'risk-high' : riskVal >= 40 ? 'risk-mid' : 'risk-low') : '';
+                 const sureMs = Number(item.elapsedMs || 0);
+                 const sureSn = sureMs > 0 ? (sureMs / 1000).toFixed(2) : null;
+                 const provider = item.provider || item.kaynak || "-";
+            %>
+            <tr class="data-row"
+                data-tc="<%= tc %>"
+                data-sonuc="<%= sonucText.toUpperCase() %>"
+                data-provider="<%= provider %>"
+                data-tarih="<%= createdAt ? new Date(createdAt).toISOString().split('T')[0] : '' %>">
+              <td><%= createdAt ? new Date(createdAt).toLocaleString('tr-TR') : "-" %></td>
+              <td>*******<%= String(tc).slice(-4) %></td>
+              <td>
+                <strong><%= ad %></strong><br>
+                <span class="muted"><%= item.dogum || "-" %></span>
+              </td>
+              <td>
+                <strong><%= item.islem_kodu || "-" %></strong><br>
+                <span class="muted"><%= item.islem_adi || "-" %></span>
+              </td>
+              <td><%= provider %></td>
+              <td>
+                <% if (isHata) { %>
+                  <span class="badge hata">HATA</span>
+                <% } else if (isAi) { %>
+                  <span class="badge ai">AI BLOKE</span>
+                <% } else if (isOnay) { %>
+                  <span class="badge onay">ONAY</span>
+                <% } else { %>
+                  <span class="badge red">RED</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (riskVal != null) { %>
+                  <span class="<%= riskClass %>"><%= riskVal %>%</span>
+                <% } else { %>
+                  —
+                <% } %>
+              </td>
+              <td><%= sureSn ? sureSn + 's' : '—' %></td>
+              <td>
+                <details>
+                  <summary>📄 Detay</summary>
+                  <div class="detail-panel">
+                    <div class="detail-grid">
+                      <div class="detail-item">
+                        <strong>Red Nedeni</strong>
+                        <span><%= item.red_nedeni || "-" %></span>
+                      </div>
+                      <div class="detail-item">
+                        <strong>Hata Mesajı</strong>
+                        <span><%= item.hata || item.mesaj || "-" %></span>
+                      </div>
+                      <div class="detail-item">
+                        <strong>Takip No</strong>
+                        <span><%= item.takip_no || "-" %></span>
+                      </div>
+                      <div class="detail-item">
+                        <strong>Retry</strong>
+                        <span><%= item.retry_kullanildi ? "✅ Denendi" : "— Yok" %></span>
+                      </div>
+                      <div class="detail-item">
+                        <strong>AI Risk Skoru</strong>
+                        <span class="<%= riskClass %>"><%= riskVal != null ? riskVal + '%' : '-' %></span>
+                      </div>
+                      <div class="detail-item">
+                        <strong>Bot Süresi</strong>
+                        <span><%= sureSn ? sureSn + ' saniye' : '-' %></span>
+                      </div>
+                    </div>
+
+                    <% if (item.gerekcePdf || item.gerekce_pdf) { %>
+                      <div style="margin-top:12px;">
+                        <a class="pdf-link" href="/generated_docs/<%= (item.gerekcePdf || item.gerekce_pdf || '').split(/[/\\]/).pop() %>" target="_blank">
+                          📄 Gerekçe PDF İndir
+                        </a>
+                      </div>
+                    <% } %>
+
+                    <% if (item.ai_aciklama || item.red_nedeni) { %>
+                      <div style="margin-top:12px;">
+                        <strong style="font-size:.78rem;color:#475569;">AI Açıklaması</strong>
+                        <p style="font-size:.85rem;color:#334155;margin-top:4px;line-height:1.5;">
+                          <%= item.ai_aciklama || item.red_nedeni || "-" %>
+                        </p>
+                      </div>
+                    <% } %>
+                  </div>
+                </details>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination"></div>
+    <% } %>
+  </div>
+</div>
+
+<script>
+  // ── Client-side Filtreleme ──
+  function filtrele() {
+    const tcVal = document.getElementById('f-tc').value.trim().toLowerCase();
+    const sonucVal = document.getElementById('f-sonuc').value;
+    const providerVal = document.getElementById('f-provider').value;
+    const tarihVal = document.getElementById('f-tarih').value;
+
+    document.querySelectorAll('.data-row').forEach(row => {
+      const tc = row.dataset.tc || '';
+      const sonuc = row.dataset.sonuc || '';
+      const provider = row.dataset.provider || '';
+      const tarih = row.dataset.tarih || '';
+
+      let show = true;
+      if (tcVal && !tc.includes(tcVal)) show = false;
+      if (sonucVal && !sonuc.includes(sonucVal)) show = false;
+      if (providerVal && provider !== providerVal) show = false;
+      if (tarihVal && tarih !== tarihVal) show = false;
+
+      row.style.display = show ? '' : 'none';
+    });
+
+    paginate();
+  }
+
+  function temizle() {
+    document.getElementById('f-tc').value = '';
+    document.getElementById('f-sonuc').value = '';
+    document.getElementById('f-provider').value = '';
+    document.getElementById('f-tarih').value = '';
+    document.querySelectorAll('.data-row').forEach(r => r.style.display = '');
+    paginate();
+  }
+
+  // ── CSV Export ──
+  function exportCSV() {
+    const rows = document.querySelectorAll('.data-row');
+    let csv = 'Zaman,TC,Hasta,İşlem Kodu,Provider,Sonuç,AI Risk,Süre\n';
+
+    rows.forEach(row => {
+      if (row.style.display === 'none') return;
+      const cells = row.querySelectorAll('td');
+      const vals = [];
+      for (let i = 0; i < Math.min(cells.length, 8); i++) {
+        vals.push('"' + cells[i].textContent.trim().replace(/"/g, '""') + '"');
+      }
+      csv += vals.join(',') + '\n';
+    });
+
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `islem_gecmisi_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── Client-side Pagination ──
+  const PAGE_SIZE = 25;
+  let currentPage = 1;
+
+  function paginate() {
+    const rows = Array.from(document.querySelectorAll('.data-row')).filter(r => r.style.display !== 'none');
+    const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    rows.forEach((row, idx) => {
+      const page = Math.floor(idx / PAGE_SIZE) + 1;
+      row.style.display = page === currentPage ? '' : 'none';
+    });
+
+    const pag = document.getElementById('pagination');
+    if (!pag) return;
+
+    let html = `<span class="info">${rows.length} kayıt, sayfa ${currentPage}/${totalPages}</span>`;
+    html += `<button ${currentPage <= 1 ? 'disabled' : ''} onclick="goPage(${currentPage-1})">◀ Önceki</button>`;
+
+    for (let i = 1; i <= Math.min(totalPages, 7); i++) {
+      html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+    }
+    if (totalPages > 7) html += `<span>...</span><button onclick="goPage(${totalPages})">${totalPages}</button>`;
+
+    html += `<button ${currentPage >= totalPages ? 'disabled' : ''} onclick="goPage(${currentPage+1})">Sonraki ▶</button>`;
+    pag.innerHTML = html;
+  }
+
+  function goPage(page) {
+    currentPage = page;
+    // Tüm filtrelenmiş satırları tekrar göster, sonra paginate
+    document.querySelectorAll('.data-row').forEach(r => {
+      if (!r.classList.contains('filtered-out')) r.style.display = '';
+    });
+    paginate();
+  }
+
+  // İlk yüklemede paginate et
+  paginate();
+</script>
+</body>
+</html>

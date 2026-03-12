@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  rpa:
+    build: .
+    container_name: rpa_panel
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - rpa_data:/app/data
+    environment:
+      - NODE_ENV=production
+      - HTTPS=true
+      - DB_PATH=/app/data/rpa.db
+
+volumes:
+  rpa_data:

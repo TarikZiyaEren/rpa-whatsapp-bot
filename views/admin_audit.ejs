@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Audit Log</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 24px;
+      background: #f4f6fb;
+      color: #222;
+    }
+
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 0;
+      margin-bottom: 18px;
+    }
+
+    .hospital-badge {
+      font-size: .78rem;
+      background: #e8eaf6;
+      color: #1a237e;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .topbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      border: 1px solid #d0d7e2;
+      background: white;
+      color: #222;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin-top: 0;
+      color: #666;
+    }
+
+    .filter-form {
+      display: flex;
+      gap: 12px;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+
+    .field {
+      min-width: 280px;
+      flex: 1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #444;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d6dbe5;
+      border-radius: 8px;
+      background: white;
+    }
+
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      background: #1f3c88;
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: white;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    th, td {
+      border: 1px solid #e7eaf0;
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #2c3e50;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background: #f9fbff;
+    }
+
+    .LOGIN {
+      color: green;
+    }
+
+    .LOGIN_FAIL {
+      color: red;
+      font-weight: bold;
+    }
+
+    .LOGOUT {
+      color: gray;
+    }
+
+    .muted {
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    🔒 Audit Trail
+    <% if (typeof currentHospital !== "undefined" && currentHospital) { %>
+      <span class="hospital-badge"><%= currentHospital.ad %></span>
+    <% } %>
+  </h1>
+
+  <div class="topbar">
+    <a class="btn" href="/">Ana Sayfa</a>
+    <a class="btn" href="/dashboard">Dashboard</a>
+    <a class="btn" href="/monitoring">Monitoring</a>
+    <a class="btn" href="/admin/users">Kullanıcılar</a>
+  </div>
+
+  <div class="card">
+    <h2>🔒 Audit Trail</h2>
+    <p>Son 200 kayıt — değiştirilemez işlem geçmişi</p>
+
+    <% const safeHospitals = Array.isArray(hospitals) ? hospitals : []; %>
+
+    <form method="GET" action="/admin/audit" class="filter-form">
+      <div class="field">
+        <label>Hastaneye Göre Filtrele</label>
+        <select name="hospitalId">
+          <option value="">Tüm hastaneler</option>
+          <% safeHospitals.forEach(h => { %>
+            <option value="<%= h.id %>" <%= selectedHospitalId === h.id ? "selected" : "" %>>
+              <%= h.ad %> (<%= h.kod %>)
+            </option>
+          <% }) %>
+        </select>
+      </div>
+      <button type="submit">Filtrele</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <% const safeLoglar = Array.isArray(loglar) ? loglar : []; %>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Zaman</th>
+          <th>Kullanıcı</th>
+          <th>IP</th>
+          <th>İşlem</th>
+          <th>Detay</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (safeLoglar.length === 0) { %>
+          <tr>
+            <td colspan="5" class="muted">Kayıt bulunamadı.</td>
+          </tr>
+        <% } %>
+
+        <% if (safeLoglar.length > 0) { %>
+          <% for (const log of safeLoglar) { %>
+            <tr>
+              <td><%= new Date(log.zaman).toLocaleString("tr-TR") %></td>
+              <td><%= log.kullanici || "-" %></td>
+              <td><%= log.ip || "-" %></td>
+              <td class="<%= log.islem || '' %>"><%= log.islem || "-" %></td>
+              <td><%= log.detay || "-" %></td>
+            </tr>
+          <% } %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

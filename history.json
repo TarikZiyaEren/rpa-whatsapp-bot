@@ -1,0 +1,83 @@
+[
+  {
+    "time": "2026-03-03T18:39:15.774Z",
+    "tc": "10399645546",
+    "ad": "Tarık Ziya Eren",
+    "dogum": "25.12.2006",
+    "sonuc": "ONAYLANDI (TC: 10399645546, Ad: Tarık Ziya Eren, Doğum: 25.12.2006)",
+    "hata": null,
+    "elapsedMs": 4881
+  },
+  {
+    "time": "2026-03-03T18:39:50.366Z",
+    "tc": "10399645546",
+    "ad": "Tarık Ziya Eren",
+    "dogum": "25.12.2006",
+    "sonuc": "ONAYLANDI (TC: 10399645546, Ad: Tarık Ziya Eren, Doğum: 25.12.2006)",
+    "hata": null,
+    "elapsedMs": 7919
+  },
+  {
+    "time": "2026-03-03T18:41:25.126Z",
+    "tc": "10399645546",
+    "ad": "Tarık Ziya Eren",
+    "dogum": "25.12.2006",
+    "sonuc": "ONAYLANDI (TC: 10399645546, Ad: Tarık Ziya Eren, Doğum: 25.12.2006)",
+    "hata": null,
+    "elapsedMs": 6845
+  },
+  {
+    "time": "2026-03-03T19:08:34.446Z",
+    "tc": "10399645546",
+    "ad": "Tarık Ziya Eren",
+    "dogum": "25.12.2006",
+    "sonuc": null,
+    "hata": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4000/login\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:4000/login\", waiting until \"domcontentloaded\"\u001b[22m\n",
+    "elapsedMs": 4511
+  },
+  {
+    "time": "2026-03-03T19:08:58.750Z",
+    "tc": "10399645546",
+    "ad": "Tarık Ziya Eren",
+    "dogum": "25.12.2006",
+    "sonuc": null,
+    "hata": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4000/login\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:4000/login\", waiting until \"domcontentloaded\"\u001b[22m\n",
+    "elapsedMs": 4249
+  },
+  {
+    "time": "2026-03-03T19:11:23.290Z",
+    "tc": "10399645546",
+    "ad": "Tarık Ziya Eren",
+    "dogum": "25.12.2006",
+    "sonuc": null,
+    "hata": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4000/login\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:4000/login\", waiting until \"domcontentloaded\"\u001b[22m\n",
+    "elapsedMs": 5510
+  },
+  {
+    "time": "2026-03-03T19:13:39.253Z",
+    "tc": "10399645546",
+    "ad": "Tarık Ziya Eren",
+    "dogum": "25.12.2006",
+    "sonuc": null,
+    "hata": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4000/login\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:4000/login\", waiting until \"domcontentloaded\"\u001b[22m\n",
+    "elapsedMs": 4254
+  },
+  {
+    "time": "2026-03-03T19:14:07.723Z",
+    "tc": "10399645546",
+    "ad": "Tarık Ziya Eren",
+    "dogum": "25.12.2006",
+    "sonuc": null,
+    "hata": "page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:4000/login\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:4000/login\", waiting until \"domcontentloaded\"\u001b[22m\n",
+    "elapsedMs": 5483
+  },
+  {
+    "time": "2026-03-03T19:36:56.426Z",
+    "tc": "10399645546",
+    "ad": "Tarık Ziya Eren",
+    "dogum": "25.12.2006",
+    "sonuc": "ONAY (TC: 10399645546, Ad: Tarık Ziya Eren, Doğum: 25.12.2006)",
+    "hata": null,
+    "elapsedMs": 5325
+  }
+]

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Sigorta Portali Girişi</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #e8f4fd; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .kart { background: white; padding: 36px; border-radius: 12px; width: 360px; box-shadow: 0 4px 20px rgba(0,0,0,.1); }
+    h2 { color: #0d47a1; margin-bottom: 20px; text-align: center; }
+    input { width: 100%; padding: 10px; margin: 8px 0 16px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
+    button { width: 100%; padding: 11px; background: #0d47a1; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+    .hata { background: #fdecea; color: #b71c1c; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <div class="kart">
+    <h2>🏦 Sigorta Portali</h2>
+    <% if (error) { %>
+      <div class="hata">❌ <%= error %></div>
+    <% } %>
+    <form method="POST" action="/login">
+      <input type="text" name="username" placeholder="Kullanıcı Adı" required autofocus>
+      <input type="password" name="password" placeholder="Şifre" required>
+      <button type="submit">Giriş</button>
+    </form>
+  </div>
+</body>
+</html>
