@@ -24,22 +24,23 @@ if (process.env.ENABLE_PROVIZYON_WORKER === "true") {
 }
 
 const authRoutes = require("./routes/auth");
-let mainRoutes = null;
 
+let mainRoutes = null;
 if (process.env.ENABLE_MAIN_ROUTES === "true") {
   mainRoutes = require("./routes/main");
   console.log("[ROUTES] mainRoutes aktif.");
 } else {
   console.log("[ROUTES] mainRoutes pasif.");
 }
-let apiRoutes = null;
 
+let apiRoutes = null;
 if (process.env.ENABLE_API_ROUTES === "true") {
   apiRoutes = require("./routes/api");
   console.log("[ROUTES] apiRoutes aktif.");
 } else {
   console.log("[ROUTES] apiRoutes pasif.");
 }
+
 const redOnlemeRoutes = require("./routes/redOnleme");
 const credentialRoutes = require("./routes/credentials");
 const adminRoutes = require("./routes/admin");
@@ -62,7 +63,7 @@ function assertRouter(name, value) {
 [
   ["authRoutes", authRoutes],
   ...(mainRoutes ? [["mainRoutes", mainRoutes]] : []),
-  ["apiRoutes", apiRoutes],
+  ...(apiRoutes ? [["apiRoutes", apiRoutes]] : []),
   ["redOnlemeRoutes", redOnlemeRoutes],
   ["credentialRoutes", credentialRoutes],
   ["adminRoutes", adminRoutes],
@@ -104,7 +105,7 @@ const genel = rateLimit({
 
 app.use(genel);
 
-// Güvenlik header'ları (en başta)
+// Güvenlik header'ları
 app.use(securityHeadersMiddleware);
 
 // X-Powered-By kaldır
@@ -132,11 +133,26 @@ app.use((req, res, next) => {
   next();
 });
 
-// Gerekçe PDF ve üretilen belgeler için static erişim
-app.use(
-  "/generated_docs",
-  express.static(path.join(__dirname, "generated_docs"))
-);
+// Static belgeler
+app.use("/generated_docs", express.static(path.join(__dirname, "generated_docs")));
+
+// Basit kök sayfa
+app.get("/", (_req, res) => {
+  res.send("RPA WhatsApp Bot çalışıyor. Sağlık kontrolü: /health");
+});
+
+// Health endpoint
+app.get("/health", (_req, res) => {
+  res.json({
+    ok: true,
+    status: "ok",
+    service: "rpa_system",
+    mainRoutes: process.env.ENABLE_MAIN_ROUTES === "true",
+    apiRoutes: process.env.ENABLE_API_ROUTES === "true",
+    provizyonWorker: process.env.ENABLE_PROVIZYON_WORKER === "true",
+    ts: new Date().toISOString(),
+  });
+});
 
 app.use("/", authRoutes);
 
@@ -146,17 +162,17 @@ app.use("/webhook", webhookRoutes);
 app.use(attachHospitalContext);
 app.use(requireActiveHospital);
 
-// KVKK maskeleme (auth sonrası, route'lardan önce)
+// KVKK maskeleme
 app.use(kvkkMaskMiddleware);
 
 if (mainRoutes) {
-  if (mainRoutes) {
   app.use("/", mainRoutes);
 }
-}
+
 if (apiRoutes) {
   app.use("/api", apiRoutes);
 }
+
 app.use("/red-onleme", redOnlemeRoutes);
 app.use("/credentials", credentialRoutes);
 app.use("/admin", adminRoutes);
@@ -168,7 +184,7 @@ app.use((req, res) => {
   res.status(404).send("Sayfa bulunamadi.");
 });
 
-// Global error tracking (hataları DB'ye kaydet)
+// Global error tracking
 app.use(errorTrackingHandler);
 
 app.use((err, req, res, next) => {
