@@ -1,16 +1,13 @@
 const express = require("express");
 const env = require("./config/env");
+const { initDb } = require("./db");
 
 const webhookRoutes = require("./routes/webhook");
-const securityHeadersMiddleware = require("./middleware/securityHeaders");
-const kvkkMaskMiddleware = require("./middleware/kvkkMask");
-const { initDb } = require("./db");
-const { startDataRetentionScheduler } = require("./services/dataRetention");
-const { startErrorTracker } = require("./services/errorTracker");
+const { securityHeadersMiddleware } = require("./middleware/securityHeaders");
+const { kvkkMaskMiddleware } = require("./middleware/kvkkMask");
 
 const app = express();
 
-// Meta signature doğrulaması için ham body saklama
 app.use(
   express.json({
     verify: (req, _res, buf) => {
@@ -25,7 +22,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(securityHeadersMiddleware);
 app.use(kvkkMaskMiddleware);
 
-// Basit health endpoint
 app.get("/health", (_req, res) => {
   res.json({
     ok: true,
@@ -36,7 +32,6 @@ app.get("/health", (_req, res) => {
   });
 });
 
-// Sadece WhatsApp webhook
 app.use("/webhook", webhookRoutes);
 
 async function start() {
@@ -47,13 +42,6 @@ async function start() {
     console.error("[RENDER] DB init hatası:", e.message);
     console.error(e.stack);
     process.exit(1);
-  }
-
-  try {
-    startDataRetentionScheduler();
-    startErrorTracker();
-  } catch (e) {
-    console.warn("[RENDER] Opsiyonel servis başlatma uyarısı:", e.message);
   }
 
   const PORT = Number(env.PORT || process.env.PORT || 10000);
