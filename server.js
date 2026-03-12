@@ -24,7 +24,14 @@ if (process.env.ENABLE_PROVIZYON_WORKER === "true") {
 }
 
 const authRoutes = require("./routes/auth");
-const mainRoutes = require("./routes/main");
+let mainRoutes = null;
+
+if (process.env.ENABLE_MAIN_ROUTES === "true") {
+  mainRoutes = require("./routes/main");
+  console.log("[ROUTES] mainRoutes aktif.");
+} else {
+  console.log("[ROUTES] mainRoutes pasif.");
+}
 const apiRoutes = require("./routes/api");
 const redOnlemeRoutes = require("./routes/redOnleme");
 const credentialRoutes = require("./routes/credentials");
@@ -47,7 +54,7 @@ function assertRouter(name, value) {
 
 [
   ["authRoutes", authRoutes],
-  ["mainRoutes", mainRoutes],
+  ...(mainRoutes ? [["mainRoutes", mainRoutes]] : []),
   ["apiRoutes", apiRoutes],
   ["redOnlemeRoutes", redOnlemeRoutes],
   ["credentialRoutes", credentialRoutes],
@@ -136,7 +143,9 @@ app.use(requireActiveHospital);
 app.use(kvkkMaskMiddleware);
 
 if (mainRoutes) {
+  if (mainRoutes) {
   app.use("/", mainRoutes);
+}
 }
 app.use("/api", apiRoutes);
 app.use("/red-onleme", redOnlemeRoutes);
