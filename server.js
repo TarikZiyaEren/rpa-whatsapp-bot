@@ -135,7 +135,9 @@ app.use(requireActiveHospital);
 // KVKK maskeleme (auth sonrası, route'lardan önce)
 app.use(kvkkMaskMiddleware);
 
-app.use("/", mainRoutes);
+if (mainRoutes) {
+  app.use("/", mainRoutes);
+}
 app.use("/api", apiRoutes);
 app.use("/red-onleme", redOnlemeRoutes);
 app.use("/credentials", credentialRoutes);
