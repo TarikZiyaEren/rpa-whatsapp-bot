@@ -16,7 +16,12 @@ const { errorTrackingHandler } = require("./services/errorTracker");
 const { startRetentionScheduler } = require("./services/dataRetention");
 
 // BullMQ worker bootstrap
-require("./workers/provizyonWorker");
+if (process.env.ENABLE_PROVIZYON_WORKER === "true") {
+  require("./workers/provizyonWorker");
+  console.log("[WORKER] Provizyon worker aktif.");
+} else {
+  console.log("[WORKER] Provizyon worker pasif.");
+}
 
 const authRoutes = require("./routes/auth");
 const mainRoutes = require("./routes/main");
